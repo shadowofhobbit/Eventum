@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="cancel">Cancelar</string>
+    <string name="drawer_close">Cerrar el menu</string>
+    <string name="drawer_open">Abrir el menu</string>
+    <string name="no_internet">No hay conexión a Internet.</string>
+    <string name="remove">Eliminar</string>
+    <string name="loading">Descargando</string>
+    <string name="nothing_to_delete">No hay fuentes para eliminar</string>
+    <string name="remove_feed">Eliminar una fuente</string>
+    <string name="copy_link">Copiar el enlace</string>
+    <string name="add_feed">Añadir una fuente</string>
+    <string name="link_copied">El enlace se ha copiado a el portapapeles</string>
+    <string name="error_adding_feed">Error al añadir el fuente</string>
+    <string name="has_already_been_added"> ya se ha añadido.</string>
+    <string name="chosen_feed_default">Todo</string>
+    <string name="all_feeds">Todo</string>
+    <string name="no_feeds_added_yet">No hay fuentes para mostrar. Añade algo.</string>
+    <string name="enter_url">Escribe la URL</string>
+
+</resources>

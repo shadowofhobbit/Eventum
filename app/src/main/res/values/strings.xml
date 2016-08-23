@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name" translatable="false">Eventum</string>
+    <string name="add_feed">Add feed</string>
+    <string name="remove_feed">Remove feed</string>
+    <string name="chosen_feed_default">All</string>
+    <string name="all_feeds">All</string>
+    <string name="cancel">Cancel</string>
+    <string name="drawer_open">Open drawer</string>
+    <string name="drawer_close">Close drawer</string>
+    <string name="copy_link">Copy link</string>
+    <string name="no_internet">No Internet connection</string>
+    <string name="error_adding_feed">Error adding feed</string>
+    <string name="has_already_been_added"> has already been added.</string>
+    <string name="remove">Remove</string>
+    <string name="nothing_to_delete">Nothing to delete</string>
+    <string name="link_copied">Link has been copied to the clipboard</string>
+    <string name="loading">Loading</string>
+    <string name="no_feeds_added_yet">No feeds to show. Add something.</string>
+    <string name="chosen_feed_pref_label" translatable="false">chosenFeed</string>
+    <string name="rss_link_example" translatable="false">http://www.example.com/rss</string>
+    <string name="enter_url">Enter URL</string>
+
+</resources>
