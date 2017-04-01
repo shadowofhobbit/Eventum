@@ -12,7 +12,7 @@ public class Reader {
     private final Map<String, Channel> feeds;
     private final Set<News> allNews;
 
-    public Reader() {
+    Reader() {
         feeds = new HashMap<>();
         allNews = new TreeSet<>();
     }

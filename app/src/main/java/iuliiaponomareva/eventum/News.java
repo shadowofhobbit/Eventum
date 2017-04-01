@@ -20,7 +20,7 @@ class News implements Comparable<News>, Parcelable {
         this.link = link;
     }
 
-    protected News(Parcel in) {
+    private News(Parcel in) {
         title = in.readString();
         link = in.readString();
         description = in.readString();
@@ -43,26 +43,26 @@ class News implements Comparable<News>, Parcelable {
         return title;
     }
 
-    public String getLink() {
+    String getLink() {
         return link;
     }
 
-    public String getDescription() {
+    String getDescription() {
         return description;
     }
 
-    public Date getPubDate() {
+    Date getPubDate() {
         return pubDate;
     }
 
-    public void setPubDate(Date pubDate) {
+    void setPubDate(Date pubDate) {
         this.pubDate = pubDate;
     }
 
     @Override
     public int compareTo(@NonNull News other) {
         if ((getPubDate() != null) && (other.getPubDate() != null))
-            return -this.getPubDate().compareTo(other.getPubDate());
+            return other.getPubDate().compareTo(this.getPubDate());
         else
             return Integer.MAX_VALUE;
     }

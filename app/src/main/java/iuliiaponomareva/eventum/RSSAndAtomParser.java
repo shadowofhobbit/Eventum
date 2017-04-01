@@ -19,11 +19,11 @@ import java.util.Set;
 import java.util.TreeSet;
 
 public class RSSAndAtomParser {
-    enum Format {RSS, ATOM}
+    private enum Format {RSS, ATOM}
 
     private static final String RSS_FEED_START_TAG = "rss";
     private static final String ATOM_FEED_START_TAG = "feed";
-    private String ns = null;
+    private static final String ns = null;
 
     private static Date parseDate(String dateToParse, Format format) {
         //example of rss
@@ -117,6 +117,7 @@ public class RSSAndAtomParser {
                                 case "link":
                                     link = readTag(parser, name);
                                     break;
+                                default:
                             }
                         }
                     }
@@ -149,7 +150,7 @@ public class RSSAndAtomParser {
                             parser.require(XmlPullParser.START_TAG, ns, "link");
                             link = parser.getAttributeValue(ns, "href");
                             break;
-
+                        default:
                     }
                 }
             }
@@ -184,7 +185,7 @@ public class RSSAndAtomParser {
         return result;
     }
 
-    public Set<News> parseNews(String url) {
+    Set<News> parseNews(String url) {
         Set<News> result = new TreeSet<>();
         InputStream stream = null;
         XmlPullParser parser = Xml.newPullParser();
@@ -310,6 +311,8 @@ public class RSSAndAtomParser {
                     case "updated":
                         pubDate = readTag(parser, name);
                         break;
+                    default:
+                        //nop
                 }
 
             }

@@ -6,19 +6,19 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
 final class FeedReaderContract {
-	public FeedReaderContract() {}
+	private FeedReaderContract() {}
 
-	public static abstract class Feeds implements BaseColumns {
-		public static final String TABLE_NAME = "feeds";
-		public static final String COLUMN_NAME_FEED_URL = "feed_url";
-		public static final String COLUMN_NAME_TITLE = "title";
-		public static final String COLUMN_NAME_LINK = "link";
-		public static final String COLUMN_NAME_DESCRIPTION = "description";
+	static abstract class Feeds implements BaseColumns {
+		static final String TABLE_NAME = "feeds";
+		static final String COLUMN_NAME_FEED_URL = "feed_url";
+		static final String COLUMN_NAME_TITLE = "title";
+		static final String COLUMN_NAME_LINK = "link";
+		static final String COLUMN_NAME_DESCRIPTION = "description";
 
 	}
 }
 
-public class DbHelper extends SQLiteOpenHelper {
+class DbHelper extends SQLiteOpenHelper {
 	private static final String TEXT_TYPE = " TEXT";
 	private static final String COMMA_SEP = ",";
 	private static final String SQL_CREATE_ENTRIES =

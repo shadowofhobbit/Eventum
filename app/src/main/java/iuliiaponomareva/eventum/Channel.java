@@ -23,7 +23,7 @@ class Channel implements Parcelable{
         this.link = link;
     }
 
-    protected Channel(Parcel in) {
+    private Channel(Parcel in) {
         URL = in.readString();
         title = in.readString();
         link = in.readString();
@@ -47,7 +47,7 @@ class Channel implements Parcelable{
         return getTitle();
     }
 
-    public String getURL() {
+    String getURL() {
         return URL;
     }
 
@@ -55,19 +55,19 @@ class Channel implements Parcelable{
         return title;
     }
 
-    public String getLink() {
+    String getLink() {
         return link;
     }
 
-    public String getDescription() {
+    String getDescription() {
         return description;
     }
 
-    public Set<News> getNews() {
+    Set<News> getNews() {
         return news;
     }
 
-    public void setNews(News[] news) {
+    void setNews(News[] news) {
         Collections.addAll(this.news, news);
     }
 

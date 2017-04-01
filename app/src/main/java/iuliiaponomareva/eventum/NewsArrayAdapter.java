@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.text.Html;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
@@ -26,14 +27,14 @@ public class NewsArrayAdapter extends ArrayAdapter<News> {
     Picasso picasso;
     String channelURL;
 
-    public NewsArrayAdapter(Context context, int resource, List<News> news) {
-        super(context, resource, news);
+    NewsArrayAdapter(Context context, List<News> news) {
+        super(context, R.layout.news_list_item, news);
         this.context = context;
         picasso = Picasso.with(context);
     }
 
-    public static class ViewHolder {
-        public TextView textView;
+    private static class ViewHolder {
+        TextView textView;
     }
 
     void setChannelURL(String channelURL) {
@@ -45,7 +46,7 @@ public class NewsArrayAdapter extends ArrayAdapter<News> {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         ViewHolder holder;
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -68,7 +69,7 @@ public class NewsArrayAdapter extends ArrayAdapter<News> {
 
 }
 class MyDrawable extends BitmapDrawable {
-    public MyDrawable(Resources res) {
+    MyDrawable(Resources res) {
         super(res, (Bitmap) null);
     }
     Drawable drawable;

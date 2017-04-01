@@ -14,7 +14,7 @@ import java.util.List;
 class ChannelsLoader extends AsyncTaskLoader<List<Channel>> {
     private Reader reader;
 
-    public ChannelsLoader(Context context, Reader reader) {
+    ChannelsLoader(Context context, Reader reader) {
         super(context);
         this.reader = reader;
     }

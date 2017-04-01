@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity
     private Channel all;
     private SwipeRefreshLayout refreshLayout;
     private BroadcastReceiver receiver;
-    private final int CHANNEL_LOADER_ID = 0;
+    private final static int CHANNEL_LOADER_ID = 0;
 
 
 
@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
         news = new ArrayList<>();
-        newsAdapter = new NewsArrayAdapter(MainActivity.this, R.layout.news_list_item, news);
+        newsAdapter = new NewsArrayAdapter(MainActivity.this, news);
         newsListView.setAdapter(newsAdapter);
         newsListView.setEmptyView(findViewById(R.id.empty_textview));
         refreshLayout = ((SwipeRefreshLayout) findViewById(R.id.swipe_to_refresh));
@@ -367,7 +367,7 @@ public class MainActivity extends AppCompatActivity
         reader.addAll(data);
         drawerAdapter.clear();
         TextView textView = (TextView)findViewById(R.id.empty_textview);
-        if ((data == null) || data.isEmpty())
+        if (data.isEmpty())
             textView.setText(R.string.no_feeds_added_yet);
         else
             textView.setText(R.string.loading);
