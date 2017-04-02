@@ -1,24 +1,42 @@
-package iuliiaponomareva.eventum;
+package iuliiaponomareva.eventum.data;
 
+import java.io.Serializable;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import iuliiaponomareva.eventum.activities.MainActivity;
+import iuliiaponomareva.eventum.async.NewsService;
+import iuliiaponomareva.eventum.async.ParseChannelService;
+
 
 public class Reader {
     private final Map<String, Channel> feeds;
     private final Set<News> allNews;
 
-    Reader() {
+    public Reader() {
         feeds = new HashMap<>();
-        allNews = new TreeSet<>();
+        allNews = new TreeSet<>(new NewsComparator());
     }
 
     public void addFeed(MainActivity activity, String... rssURL) {
         ParseChannelService.startActionParseInfo(activity, rssURL);
+    }
+
+    private static class NewsComparator implements Comparator<News>, Serializable {
+
+        @Override
+        public int compare(News news1, News news2) {
+            if ((news1.getPubDate() != null) && (news2.getPubDate() != null)) {
+                return news2.getPubDate().compareTo(news1.getPubDate());
+            } else {
+                return Integer.MAX_VALUE;
+            }
+        }
     }
 
     public void addFeed(Channel channel) {
@@ -27,12 +45,14 @@ public class Reader {
 
     public void removeFeed(String rssURL) {
         Channel feed = feeds.remove(rssURL);
-        if (feed != null)
-            for (News news : feed.getNews())
+        if (feed != null) {
+            for (News news : feed.getNews()) {
                 allNews.remove(news);
+            }
+        }
     }
-    public Channel getFeed(String URL) {
-        return feeds.get(URL);
+    public Channel getFeed(String url) {
+        return feeds.get(url);
     }
     public String[] getFeeds() {
         return feeds.keySet().toArray(new String[feeds.size()]);
@@ -52,16 +72,17 @@ public class Reader {
         return allNews;
     }
 
-    public void refreshNewsFromFeed(String URL, MainActivity activity) {
-        NewsService.startActionLoadNews(activity, new String[]{URL});
+    public void refreshNewsFromFeed(String url, MainActivity activity) {
+        NewsService.startActionLoadNews(activity, new String[]{url});
     }
 
-    void finishRefreshing(News[] res, String URL) {
+    public void finishRefreshing(News[] res, String url) {
         if (res != null) {
             Collections.addAll(allNews, res);
-            Channel feed = feeds.get(URL);
-            if (feed != null)
+            Channel feed = feeds.get(url);
+            if (feed != null) {
                 feed.setNews(res);
+            }
         }
     }
 
@@ -69,10 +90,11 @@ public class Reader {
         return Collections.unmodifiableSet(feeds.get(rssURL).getNews());
     }
 
-    public static String checkURL(String URL) {
-        if (!URL.startsWith("http"))
-            URL = "http://" + URL;
-        return URL;
+    public static String checkURL(String url) {
+        if (!url.startsWith("http")) {
+            url = "http://" + url;
+        }
+        return url;
     }
 
     public void addAll(List<Channel> data) {

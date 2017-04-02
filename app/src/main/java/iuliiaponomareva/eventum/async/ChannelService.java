@@ -1,4 +1,4 @@
-package iuliiaponomareva.eventum;
+package iuliiaponomareva.eventum.async;
 
 import android.app.IntentService;
 import android.content.ContentValues;
@@ -9,6 +9,10 @@ import android.os.Parcelable;
 import android.support.v4.content.LocalBroadcastManager;
 
 import java.util.Arrays;
+
+import iuliiaponomareva.eventum.data.Channel;
+import iuliiaponomareva.eventum.data.DbHelper;
+import iuliiaponomareva.eventum.data.FeedReaderContract;
 
 
 public class ChannelService extends IntentService {
@@ -82,8 +86,9 @@ public class ChannelService extends IntentService {
                 db.endTransaction();
                 db.close();
             }
-            if (dbHelper != null)
+            if (dbHelper != null) {
                 dbHelper.close();
+            }
         }
     }
 
@@ -95,13 +100,15 @@ public class ChannelService extends IntentService {
             dbHelper = new DbHelper(this);
             db = dbHelper.getWritableDatabase();
             db.delete(FeedReaderContract.Feeds.TABLE_NAME,
-                    FeedReaderContract.Feeds.COLUMN_NAME_FEED_URL + "= '" + url +"'", null);
+                    FeedReaderContract.Feeds.COLUMN_NAME_FEED_URL + "= '" + url + "'", null);
 
         } finally {
-            if (db != null)
+            if (db != null) {
                 db.close();
-            if (dbHelper != null)
+            }
+            if (dbHelper != null) {
                 dbHelper.close();
+            }
         }
 
     }

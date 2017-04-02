@@ -1,4 +1,4 @@
-package iuliiaponomareva.eventum;
+package iuliiaponomareva.eventum.data;
 
 
 import android.os.Parcel;
@@ -7,14 +7,16 @@ import android.support.annotation.NonNull;
 
 import java.util.Date;
 
-class News implements Comparable<News>, Parcelable {
+import iuliiaponomareva.eventum.util.HTMLFormatter;
+
+public class News implements Parcelable {
 
     private String title;
     private String link;
     private String description;
     private Date pubDate;
 
-    News(String title, String link, String description) {
+    public News(String title, String link, String description) {
         this.title = title;
         this.description = description;
         this.link = link;
@@ -43,29 +45,22 @@ class News implements Comparable<News>, Parcelable {
         return title;
     }
 
-    String getLink() {
+    public String getLink() {
         return link;
     }
 
-    String getDescription() {
+    public String getDescription() {
         return description;
     }
 
-    Date getPubDate() {
-        return pubDate;
+    public Date getPubDate() {
+        return new Date(pubDate.getTime());
     }
 
-    void setPubDate(Date pubDate) {
-        this.pubDate = pubDate;
+    public void setPubDate(@NonNull Date pubDate) {
+        this.pubDate = new Date(pubDate.getTime());
     }
 
-    @Override
-    public int compareTo(@NonNull News other) {
-        if ((getPubDate() != null) && (other.getPubDate() != null))
-            return other.getPubDate().compareTo(this.getPubDate());
-        else
-            return Integer.MAX_VALUE;
-    }
 
     @Override
     public String toString() {

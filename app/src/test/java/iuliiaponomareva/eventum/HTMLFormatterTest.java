@@ -2,10 +2,13 @@ package iuliiaponomareva.eventum;
 
 import junit.framework.Assert;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import java.text.DateFormat;
 import java.util.Date;
+
+import iuliiaponomareva.eventum.data.News;
+import iuliiaponomareva.eventum.util.HTMLFormatter;
 
 
 public class HTMLFormatterTest {

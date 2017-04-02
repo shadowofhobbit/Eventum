@@ -1,4 +1,4 @@
-package iuliiaponomareva.eventum;
+package iuliiaponomareva.eventum.adapters;
 
 import android.app.Activity;
 import android.content.Context;
@@ -22,43 +22,61 @@ import com.squareup.picasso.Target;
 
 import java.util.List;
 
+import iuliiaponomareva.eventum.R;
+import iuliiaponomareva.eventum.data.News;
+
 public class NewsArrayAdapter extends ArrayAdapter<News> {
     private Context context;
-    Picasso picasso;
-    String channelURL;
 
-    NewsArrayAdapter(Context context, List<News> news) {
+    Picasso getPicasso() {
+        return picasso;
+    }
+
+    private Picasso picasso;
+
+    String getChannelURL() {
+        return channelURL;
+    }
+
+    private String channelURL;
+
+    public NewsArrayAdapter(Context context, List<News> news) {
         super(context, R.layout.news_list_item, news);
         this.context = context;
         picasso = Picasso.with(context);
     }
 
+
     private static class ViewHolder {
-        TextView textView;
+
+        private TextView textView;
     }
 
-    void setChannelURL(String channelURL) {
+    public void setChannelURL(String channelURL) {
         this.channelURL = channelURL;
     }
 
-    void cancel() {
+    public void cancel() {
         picasso.cancelTag(channelURL);
     }
 
+    @NonNull
     @Override
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         ViewHolder holder;
         if (convertView == null) {
-            LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater inflater = (LayoutInflater) context
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.news_list_item, parent, false);
             holder = new ViewHolder();
             holder.textView = (TextView) convertView.findViewById(R.id.news_textview);
             convertView.setTag(holder);
-        } else
+        } else {
             holder = (ViewHolder) convertView.getTag();
-
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            holder.textView.setText(Html.fromHtml(getItem(position).toString(), Html.FROM_HTML_MODE_LEGACY,
+            holder.textView.setText(Html.fromHtml(getItem(position).toString(),
+                    Html.FROM_HTML_MODE_LEGACY,
                     new MyImageGetter(this, holder.textView), null));
         } else {
             holder.textView.setText(Html.fromHtml(getItem(position).toString(),
@@ -72,11 +90,16 @@ class MyDrawable extends BitmapDrawable {
     MyDrawable(Resources res) {
         super(res, (Bitmap) null);
     }
-    Drawable drawable;
+
+    void setDrawable(Drawable drawable) {
+        this.drawable = drawable;
+    }
+
+    private Drawable drawable;
 
     @Override
     public void draw(Canvas canvas) {
-        if(drawable != null) {
+        if (drawable != null) {
             drawable.draw(canvas);
         }
     }
@@ -89,22 +112,26 @@ class MyImageGetter implements Html.ImageGetter, Target {
     private MyDrawable image;
     private TextView view;
 
-    public MyImageGetter(NewsArrayAdapter newsArrayAdapter, TextView view) {
+    MyImageGetter(NewsArrayAdapter newsArrayAdapter, TextView view) {
         super();
         this.newsArrayAdapter = newsArrayAdapter;
         this.view = view;
         DisplayMetrics metrics = new DisplayMetrics();
-        ((Activity) newsArrayAdapter.getContext()).getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        ((Activity) newsArrayAdapter.getContext()).getWindowManager().getDefaultDisplay()
+                .getMetrics(metrics);
         width = metrics.widthPixels;
     }
 
     @Override
     public Drawable getDrawable(String source) {
         image = new MyDrawable(newsArrayAdapter.getContext().getResources());
-        if (source.startsWith("//"))
+        if (source.startsWith("//")) {
             source = "http:" + source;
+        }
         this.source = source;
-        newsArrayAdapter.picasso.load(source).tag(newsArrayAdapter.channelURL).resize(width, 0).onlyScaleDown().into(this);
+        newsArrayAdapter.getPicasso().load(source).tag(newsArrayAdapter.getChannelURL())
+                .resize(width, 0)
+                .onlyScaleDown().into(this);
         return image;
     }
 
@@ -112,10 +139,11 @@ class MyImageGetter implements Html.ImageGetter, Target {
     @Override
     public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
         if ((source != null) && (bitmap != null)) {
-            Drawable image = new BitmapDrawable(newsArrayAdapter.getContext().getResources(), bitmap);
+            Drawable image = new BitmapDrawable(newsArrayAdapter.getContext().getResources(),
+                    bitmap);
             image.setBounds(0, 0, image.getIntrinsicWidth(), image.getIntrinsicHeight());
             this.image.setBounds(0, 0, image.getIntrinsicWidth(), image.getIntrinsicHeight());
-            this.image.drawable = image;
+            this.image.setDrawable(image);
             view.invalidate();
             view.setText(view.getText());
         }

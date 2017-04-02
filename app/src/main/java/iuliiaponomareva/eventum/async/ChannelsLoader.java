@@ -1,4 +1,4 @@
-package iuliiaponomareva.eventum;
+package iuliiaponomareva.eventum.async;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
@@ -9,12 +9,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import iuliiaponomareva.eventum.data.Channel;
+import iuliiaponomareva.eventum.data.DbHelper;
+import iuliiaponomareva.eventum.data.FeedReaderContract;
+import iuliiaponomareva.eventum.data.Reader;
 
 
-class ChannelsLoader extends AsyncTaskLoader<List<Channel>> {
+public class ChannelsLoader extends AsyncTaskLoader<List<Channel>> {
     private Reader reader;
 
-    ChannelsLoader(Context context, Reader reader) {
+    public ChannelsLoader(Context context, Reader reader) {
         super(context);
         this.reader = reader;
     }
@@ -22,9 +26,9 @@ class ChannelsLoader extends AsyncTaskLoader<List<Channel>> {
     @Override
     protected void onStartLoading() {
         Channel[] channels = reader.getChannels();
-        if (channels.length == 0)
+        if (channels.length == 0) {
             forceLoad();
-        else {
+        } else {
             List<Channel> channelList = new ArrayList<>();
             Collections.addAll(channelList, channels);
             deliverResult(channelList);
@@ -55,26 +59,29 @@ class ChannelsLoader extends AsyncTaskLoader<List<Channel>> {
             );
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
-                String url = cursor.getString(
-                        cursor.getColumnIndexOrThrow(FeedReaderContract.Feeds.COLUMN_NAME_FEED_URL));
-                String title = cursor.getString(
-                        cursor.getColumnIndexOrThrow(FeedReaderContract.Feeds.COLUMN_NAME_TITLE));
-                String link = cursor.getString(
-                        cursor.getColumnIndexOrThrow(FeedReaderContract.Feeds.COLUMN_NAME_LINK));
-                String description = cursor.getString(
-                        cursor.getColumnIndexOrThrow(FeedReaderContract.Feeds.COLUMN_NAME_DESCRIPTION));
+                String url = cursor.getString(cursor.getColumnIndexOrThrow(
+                        FeedReaderContract.Feeds.COLUMN_NAME_FEED_URL));
+                String title = cursor.getString(cursor.getColumnIndexOrThrow(
+                        FeedReaderContract.Feeds.COLUMN_NAME_TITLE));
+                String link = cursor.getString(cursor.getColumnIndexOrThrow(
+                        FeedReaderContract.Feeds.COLUMN_NAME_LINK));
+                String description = cursor.getString(cursor.getColumnIndexOrThrow(
+                        FeedReaderContract.Feeds.COLUMN_NAME_DESCRIPTION));
                 Channel channel = new Channel(url, title, link, description);
                 feeds.add(channel);
                 cursor.moveToNext();
             }
 
         } finally {
-            if (cursor != null)
+            if (cursor != null) {
                 cursor.close();
-            if (db != null)
+            }
+            if (db != null) {
                 db.close();
-            if (dbHelper != null)
+            }
+            if (dbHelper != null) {
                 dbHelper.close();
+            }
         }
         return feeds;
     }

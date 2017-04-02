@@ -1,4 +1,4 @@
-package iuliiaponomareva.eventum;
+package iuliiaponomareva.eventum.fragments;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -13,6 +13,8 @@ import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import iuliiaponomareva.eventum.R;
 
 public class RemoveFeedDialogFragment extends DialogFragment {
 
@@ -41,13 +43,15 @@ public class RemoveFeedDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.remove_feed, null);
-        final ListView listView = (ListView)dialogView.findViewById(R.id.feeds_to_remove);
+        final ListView listView = (ListView) dialogView.findViewById(R.id.feeds_to_remove);
         builder.setTitle(R.string.remove_feed)
                 .setView(dialogView);
         String[] feeds = getArguments().getStringArray(FEEDS);
-        if (feeds == null)
+        if (feeds == null) {
             feeds = new String[0];
-        final ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), R.layout.news_list_item, feeds);
+        }
+        final ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
+                R.layout.news_list_item, feeds);
         listView.setAdapter(adapter);
         listView.setEmptyView(dialogView.findViewById(R.id.no_feeds_view));
         builder.setPositiveButton(R.string.remove, new DialogInterface.OnClickListener() {

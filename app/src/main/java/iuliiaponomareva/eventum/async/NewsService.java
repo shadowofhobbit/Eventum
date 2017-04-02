@@ -1,4 +1,4 @@
-package iuliiaponomareva.eventum;
+package iuliiaponomareva.eventum.async;
 
 import android.app.IntentService;
 import android.content.Context;
@@ -6,6 +6,9 @@ import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
 import java.util.Set;
+
+import iuliiaponomareva.eventum.data.News;
+import iuliiaponomareva.eventum.util.RSSAndAtomParser;
 
 public class NewsService extends IntentService {
     private static final String ACTION_LOAD_NEWS = "iuliiaponomareva.eventum.action.LOAD_NEWS";

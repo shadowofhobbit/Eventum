@@ -1,4 +1,4 @@
-package iuliiaponomareva.eventum;
+package iuliiaponomareva.eventum.activities;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -11,6 +11,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import iuliiaponomareva.eventum.R;
+
 public class ViewPageActivity extends AppCompatActivity {
     private static final String URL = "URL";
     private String url;
@@ -19,9 +21,10 @@ public class ViewPageActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_page);
-        if (getSupportActionBar() != null)
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        WebView webView = (WebView) findViewById (R.id.full_news);
+        }
+        WebView webView = (WebView) findViewById(R.id.full_news);
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {

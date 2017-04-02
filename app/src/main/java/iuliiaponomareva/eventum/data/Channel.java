@@ -1,4 +1,4 @@
-package iuliiaponomareva.eventum;
+package iuliiaponomareva.eventum.data;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -8,23 +8,23 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 
-class Channel implements Parcelable{
+public class Channel implements Parcelable {
 
-    private String URL;
+    private String url;
     private String title;
     private String link;
     private String description;
     private Set<News> news = new TreeSet<>();
 
-    Channel(String URL, String title, String link, String description) {
-        this.URL = URL;
-        this.title = TextUtils.isEmpty(title) ? URL : title;
+    public Channel(String url, String title, String link, String description) {
+        this.url = url;
+        this.title = TextUtils.isEmpty(title) ? url : title;
         this.description = description;
         this.link = link;
     }
 
     private Channel(Parcel in) {
-        URL = in.readString();
+        url = in.readString();
         title = in.readString();
         link = in.readString();
         description = in.readString();
@@ -47,19 +47,19 @@ class Channel implements Parcelable{
         return getTitle();
     }
 
-    String getURL() {
-        return URL;
+    public String getURL() {
+        return url;
     }
 
     public String getTitle() {
         return title;
     }
 
-    String getLink() {
+    public String getLink() {
         return link;
     }
 
-    String getDescription() {
+    public String getDescription() {
         return description;
     }
 
@@ -78,7 +78,7 @@ class Channel implements Parcelable{
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(URL);
+        parcel.writeString(url);
         parcel.writeString(title);
         parcel.writeString(link);
         parcel.writeString(description);

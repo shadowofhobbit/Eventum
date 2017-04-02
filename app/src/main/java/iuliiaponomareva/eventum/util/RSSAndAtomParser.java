@@ -1,4 +1,4 @@
-package iuliiaponomareva.eventum;
+package iuliiaponomareva.eventum.util;
 
 import android.support.annotation.NonNull;
 import android.util.Xml;
@@ -18,12 +18,19 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 
+import iuliiaponomareva.eventum.data.Channel;
+import iuliiaponomareva.eventum.data.News;
+
 public class RSSAndAtomParser {
-    private enum Format {RSS, ATOM}
+
+    private static final int READ_TIMEOUT = 10000;
+    private static final int CONNECT_TIMEOUT = 15000;
+
+    private enum Format { RSS, ATOM }
 
     private static final String RSS_FEED_START_TAG = "rss";
     private static final String ATOM_FEED_START_TAG = "feed";
-    private static final String ns = null;
+    private static final String NS = null;
 
     private static Date parseDate(String dateToParse, Format format) {
         //example of rss
@@ -38,25 +45,28 @@ public class RSSAndAtomParser {
         Date pubDate = null;
         String template;
         if (format == Format.RSS) {
-            if (Character.isDigit(dateToParse.charAt(dateToParse.length() - 1)))
+            if (Character.isDigit(dateToParse.charAt(dateToParse.length() - 1))) {
                 template = "EEE, dd MMM yyyy HH:mm:ss Z";
-            else if (dateToParse.endsWith("Z"))
+            } else if (dateToParse.endsWith("Z")) {
                 template = "EEE, dd MMM yyyy HH:mm:ss 'Z'";
-            else
+            } else {
                 template = "EEE, dd MMM yyyy HH:mm:ss z";
+            }
         } else {
             if (dateToParse.endsWith("Z")) {
-                if (dateToParse.contains("."))
+                if (dateToParse.contains(".")) {
                     template = "yyyy-MM-dd'T'HH:mm:ss.S'Z'";
-                else
+                } else {
                     template = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+                }
             } else {
-                if (dateToParse.contains("."))
+                if (dateToParse.contains(".")) {
                     template = "yyyy-MM-dd'T'HH:mm:ss.SZZZZZ";
-                else if (dateToParse.contains(" "))
+                } else if (dateToParse.contains(" ")) {
                     template = "yyyy-MM-dd HH:mm:ss"; //2016-01-28 13:26:03
-                else
+                } else {
                     template = "yyyy-MM-dd'T'HH:mm:ssZZZZZ";
+                }
             }
 
         }
@@ -79,19 +89,21 @@ public class RSSAndAtomParser {
             parser.setInput(stream, null);
             parser.nextTag();
             parser.require(XmlPullParser.START_TAG, null, null);
-            if (parser.getName().equals(RSS_FEED_START_TAG))
+            if (parser.getName().equals(RSS_FEED_START_TAG)) {
                 channel = parseRSSChannel(parser, url);
-            else if (parser.getName().equals(ATOM_FEED_START_TAG))
+            } else if (parser.getName().equals(ATOM_FEED_START_TAG)) {
                 channel = parseAtomFeed(parser, url);
+            }
         } catch (IOException | XmlPullParserException e) {
             e.printStackTrace();
         } finally {
-            if (stream != null)
+            if (stream != null) {
                 try {
                     stream.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            }
         }
         return channel;
 
@@ -102,8 +114,8 @@ public class RSSAndAtomParser {
         Channel channel = null;
         try {
             while (parser.next() != XmlPullParser.END_TAG) {
-                if ((parser.getEventType() == XmlPullParser.START_TAG) &&
-                        (parser.getName().equals("channel"))) {
+                if ((parser.getEventType() == XmlPullParser.START_TAG)
+                        && (parser.getName().equals("channel"))) {
                     while ((parser.next() != XmlPullParser.END_TAG)) {
                         if (parser.getEventType() == XmlPullParser.START_TAG) {
                             String name = parser.getName();
@@ -147,8 +159,8 @@ public class RSSAndAtomParser {
                             description = readTag(parser, name);
                             break;
                         case "link":
-                            parser.require(XmlPullParser.START_TAG, ns, "link");
-                            link = parser.getAttributeValue(ns, "href");
+                            parser.require(XmlPullParser.START_TAG, NS, "link");
+                            link = parser.getAttributeValue(NS, "href");
                             break;
                         default:
                     }
@@ -167,25 +179,26 @@ public class RSSAndAtomParser {
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
         connection.setDoInput(true);
-        connection.setReadTimeout(10000);
-        connection.setConnectTimeout(15000);
+        connection.setReadTimeout(READ_TIMEOUT);
+        connection.setConnectTimeout(CONNECT_TIMEOUT);
         connection.setUseCaches(false);
         connection.connect();
         return connection.getInputStream();
     }
 
-    private String readTag(XmlPullParser parser, String tag) throws IOException, XmlPullParserException {
-        parser.require(XmlPullParser.START_TAG, ns, tag);
+    private String readTag(XmlPullParser parser, String tag) throws IOException,
+            XmlPullParserException {
+        parser.require(XmlPullParser.START_TAG, NS, tag);
         String result = "";
         if (parser.next() == XmlPullParser.TEXT) {
             result = parser.getText();
             parser.nextTag();
         }
-        parser.require(XmlPullParser.END_TAG, ns, tag);
+        parser.require(XmlPullParser.END_TAG, NS, tag);
         return result;
     }
 
-    Set<News> parseNews(String url) {
+    public Set<News> parseNews(String url) {
         Set<News> result = new TreeSet<>();
         InputStream stream = null;
         XmlPullParser parser = Xml.newPullParser();
@@ -195,19 +208,21 @@ public class RSSAndAtomParser {
             parser.setInput(stream, null);
             parser.nextTag();
             parser.require(XmlPullParser.START_TAG, null, null);
-            if (parser.getName().equals(RSS_FEED_START_TAG))
+            if (parser.getName().equals(RSS_FEED_START_TAG)) {
                 result = parseRSSNews(parser);
-            else if (parser.getName().equals(ATOM_FEED_START_TAG))
+            } else if (parser.getName().equals(ATOM_FEED_START_TAG)) {
                 result = parseAtomNews(parser);
+            }
         } catch (IOException | XmlPullParserException e) {
             e.printStackTrace();
         } finally {
-            if (stream != null)
+            if (stream != null) {
                 try {
                     stream.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            }
         }
         return result;
     }
@@ -265,8 +280,9 @@ public class RSSAndAtomParser {
             }
         }
         News news = new News(title, link, description);
-        if (pubDate != null)
+        if (pubDate != null) {
             news.setPubDate(parseDate(pubDate, Format.RSS));
+        }
         return news;
     }
 
@@ -305,8 +321,8 @@ public class RSSAndAtomParser {
                         description = readTag(parser, name);
                         break;
                     case "link":
-                        parser.require(XmlPullParser.START_TAG, ns, "link");
-                        link = parser.getAttributeValue(ns, "href");
+                        parser.require(XmlPullParser.START_TAG, NS, "link");
+                        link = parser.getAttributeValue(NS, "href");
                         break;
                     case "updated":
                         pubDate = readTag(parser, name);
@@ -318,8 +334,9 @@ public class RSSAndAtomParser {
             }
         }
         News news = new News(title, link, description);
-        if (pubDate != null)
+        if (pubDate != null) {
             news.setPubDate(parseDate(pubDate, Format.ATOM));
+        }
         return news;
     }
 

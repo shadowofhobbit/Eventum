@@ -1,4 +1,4 @@
-package iuliiaponomareva.eventum;
+package iuliiaponomareva.eventum.async;
 
 import android.app.IntentService;
 import android.content.Context;
@@ -7,6 +7,9 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import iuliiaponomareva.eventum.data.Channel;
+import iuliiaponomareva.eventum.util.RSSAndAtomParser;
 
 
 public class ParseChannelService extends IntentService {
@@ -43,8 +46,9 @@ public class ParseChannelService extends IntentService {
         RSSAndAtomParser parser = new RSSAndAtomParser();
         for (String url : urls) {
             Channel channel = parser.parseChannelInfo(url);
-            if (channel != null)
+            if (channel != null) {
                 newChannels.add(channel);
+            }
         }
         Intent intent = new Intent(ACTION_BROADCAST_CHANNELS);
         intent.putExtra(NEW_CHANNELS, newChannels.toArray(new Channel[newChannels.size()]));

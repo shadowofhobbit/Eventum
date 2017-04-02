@@ -1,5 +1,4 @@
-package iuliiaponomareva.eventum;
-
+package iuliiaponomareva.eventum.activities;
 
 import android.app.LoaderManager;
 import android.content.BroadcastReceiver;
@@ -36,6 +35,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import iuliiaponomareva.eventum.data.Channel;
+import iuliiaponomareva.eventum.data.News;
+import iuliiaponomareva.eventum.adapters.NewsArrayAdapter;
+import iuliiaponomareva.eventum.R;
+import iuliiaponomareva.eventum.data.Reader;
+import iuliiaponomareva.eventum.async.ChannelService;
+import iuliiaponomareva.eventum.async.ChannelsLoader;
+import iuliiaponomareva.eventum.async.NewsService;
+import iuliiaponomareva.eventum.async.ParseChannelService;
+import iuliiaponomareva.eventum.fragments.AddFeedDialogFragment;
+import iuliiaponomareva.eventum.fragments.RemoveFeedDialogFragment;
+
 public class MainActivity extends AppCompatActivity
         implements AddFeedDialogFragment.AddFeedDialogListener,
         RemoveFeedDialogFragment.RemoveFeedDialogListener,
@@ -47,7 +58,7 @@ public class MainActivity extends AppCompatActivity
     private List<News> news;
     private NewsArrayAdapter newsAdapter;
     private ListView newsListView;
-    public final static String NEWS_LINK = "iuliiaponomareva.eventum.NEWS_LINK";
+    public static final String NEWS_LINK = "iuliiaponomareva.eventum.NEWS_LINK";
     private DrawerLayout drawerLayout;
     private ListView drawerListView;
     private ActionBarDrawerToggle drawerToggle;
@@ -55,7 +66,7 @@ public class MainActivity extends AppCompatActivity
     private Channel all;
     private SwipeRefreshLayout refreshLayout;
     private BroadcastReceiver receiver;
-    private final static int CHANNEL_LOADER_ID = 0;
+    private static final int CHANNEL_LOADER_ID = 0;
 
 
 
@@ -79,7 +90,7 @@ public class MainActivity extends AppCompatActivity
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerListView = (ListView) findViewById(R.id.drawer);
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.drawer_open,
-                R.string.drawer_close) {};
+                R.string.drawer_close);
         drawerAdapter = new ArrayAdapter<>(MainActivity.this,
                 R.layout.drawer_list_item, new ArrayList<Channel>());
         drawerLayout.addDrawerListener(drawerToggle);
@@ -98,14 +109,15 @@ public class MainActivity extends AppCompatActivity
                 if (isConnectedToNetwork()) {
                     if (selectedChannel.equals(all)) {
                         reader.refreshAllNews(MainActivity.this);
-                    }
-                    else
+                    } else {
                         reader.refreshNewsFromFeed(selectedFeed, MainActivity.this);
+                    }
                 } else {
-                    if (selectedChannel.equals(all))
+                    if (selectedChannel.equals(all)) {
                         news.addAll(reader.getAllNews());
-                    else
+                    } else {
                         news.addAll(reader.getNewsFromFeed(selectedFeed));
+                    }
                     createToast(R.string.no_internet);
                 }
                 setTitle(selectedChannel.getTitle());
@@ -117,7 +129,7 @@ public class MainActivity extends AppCompatActivity
 
     private void setUpNewsView() {
         newsListView = (ListView) findViewById(R.id.all_news);
-        newsListView.setOnItemClickListener(new OnItemClickListener(){
+        newsListView.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 News selectedNews = (News) parent.getItemAtPosition(position);
@@ -141,8 +153,8 @@ public class MainActivity extends AppCompatActivity
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
                                  int totalItemCount) {
                 int topRowVerticalPosition = (newsListView == null
-                        || newsListView.getChildCount() == 0) ?
-                        0 : newsListView.getChildAt(0).getTop();
+                        || newsListView.getChildCount() == 0)
+                        ? 0 : newsListView.getChildAt(0).getTop();
                 refreshLayout.setEnabled((firstVisibleItem == 0) && (topRowVerticalPosition >= 0));
             }
         });
@@ -153,25 +165,33 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
-                if (action.equals(ParseChannelService.ACTION_BROADCAST_CHANNELS)) {
-                    Parcelable[] parcelables = intent.getParcelableArrayExtra(
-                            ParseChannelService.NEW_CHANNELS);
-                    Channel[] newChannels = Arrays.copyOf(parcelables, parcelables.length,
-                            Channel[].class);
-                    notifyAboutNewChannel(newChannels);
-                } else if (action.equals(ChannelService.ACTION_CHANNELS_CHANGED)) {
-                    getLoaderManager().restartLoader(CHANNEL_LOADER_ID, null, MainActivity.this);
-                } else if (action.equals(NewsService.ACTION_BROADCAST_NEWS)) {
-                    String[] urls = intent.getStringArrayExtra(NewsService.URLS);
-                    for (String url : urls) {
-                        Parcelable[] parcelables = intent.getParcelableArrayExtra(url);
-                        News[] news = Arrays.copyOf(parcelables, parcelables.length, News[].class);
-                        reader.finishRefreshing(news, url);
-                    }
-                    if (urls.length == 1)
-                        showNews(reader.getNewsFromFeed(urls[0]));
-                    else
-                        showNews(reader.getAllNews());
+                switch (action) {
+                    case ParseChannelService.ACTION_BROADCAST_CHANNELS:
+                        Parcelable[] parcelables = intent.getParcelableArrayExtra(
+                                ParseChannelService.NEW_CHANNELS);
+                        Channel[] newChannels = Arrays.copyOf(parcelables, parcelables.length,
+                                Channel[].class);
+                        notifyAboutNewChannel(newChannels);
+                        break;
+                    case ChannelService.ACTION_CHANNELS_CHANGED:
+                        getLoaderManager().restartLoader(CHANNEL_LOADER_ID, null,
+                                MainActivity.this);
+                        break;
+                    case NewsService.ACTION_BROADCAST_NEWS:
+                        String[] urls = intent.getStringArrayExtra(NewsService.URLS);
+                        for (String url : urls) {
+                            Parcelable[] parcelables2 = intent.getParcelableArrayExtra(url);
+                            News[] news = Arrays.copyOf(parcelables2, parcelables2.length,
+                                    News[].class);
+                            reader.finishRefreshing(news, url);
+                        }
+                        if (urls.length == 1) {
+                            showNews(reader.getNewsFromFeed(urls[0]));
+                        } else {
+                            showNews(reader.getAllNews());
+                        }
+                        break;
+                    default:
                 }
             }
         };
@@ -201,7 +221,7 @@ public class MainActivity extends AppCompatActivity
         if (drawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
-        switch(item.getItemId()) {
+        switch (item.getItemId()) {
             case R.id.addFeedItem:
                 addFeed();
                 return true;
@@ -239,8 +259,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
-        if (receiver != null)
+        if (receiver != null) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+        }
     }
 
     @Override
@@ -270,12 +291,10 @@ public class MainActivity extends AppCompatActivity
             feedUrl = Reader.checkURL(feedUrl);
             if (reader.hasFeed(feedUrl)) {
                 createToast(feedUrl + " " + getString(R.string.has_already_been_added));
-            }
-            else {
+            } else {
                 reader.addFeed(this, feedUrl);
             }
-        }
-        else {
+        } else {
             createToast(R.string.no_internet);
         }
     }
@@ -283,12 +302,13 @@ public class MainActivity extends AppCompatActivity
     private void notifyAboutNewChannel(Channel[] newChannels) {
         if ((newChannels != null) && (newChannels.length != 0)) {
             ChannelService.startActionSave(this, newChannels);
-            for (Channel channel: newChannels)
+            for (Channel channel: newChannels) {
                 reader.addFeed(channel);
+            }
             getLoaderManager().restartLoader(CHANNEL_LOADER_ID, null, this);
-        }
-        else
+        } else {
             createToast(R.string.error_adding_feed);
+        }
     }
 
     private void createToast(String message) {
@@ -305,8 +325,9 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void removeChosenFeed(String feedURL) {
-        if ((selectedChannel != null)&&(selectedChannel.getURL().equals(feedURL)))
+        if ((selectedChannel != null) && (selectedChannel.getURL().equals(feedURL))) {
             selectedChannel = all;
+        }
         drawerAdapter.remove(reader.getFeed(feedURL));
         reader.removeFeed(feedURL);
         drawerAdapter.notifyDataSetChanged();
@@ -329,17 +350,18 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void refreshNews() {
-        if (selectedChannel == null)
+        if (selectedChannel == null) {
             selectedChannel = all;
+        }
         if (isConnectedToNetwork()) {
             news.clear();
-            if (selectedChannel.equals(all))
+            if (selectedChannel.equals(all)) {
                 reader.refreshAllNews(this);
-            else
+            } else {
                 reader.refreshNewsFromFeed(selectedChannel.getURL(), this);
+            }
             newsAdapter.notifyDataSetChanged();
-        }
-        else {
+        } else {
             createToast(R.string.no_internet);
         }
     }
@@ -366,11 +388,12 @@ public class MainActivity extends AppCompatActivity
     public void onLoadFinished(Loader<List<Channel>> loader, List<Channel> data) {
         reader.addAll(data);
         drawerAdapter.clear();
-        TextView textView = (TextView)findViewById(R.id.empty_textview);
-        if (data.isEmpty())
+        TextView textView = (TextView) findViewById(R.id.empty_textview);
+        if (data.isEmpty()) {
             textView.setText(R.string.no_feeds_added_yet);
-        else
+        } else {
             textView.setText(R.string.loading);
+        }
         drawerAdapter.add(all);
         drawerAdapter.addAll(data);
         drawerAdapter.notifyDataSetChanged();
@@ -378,10 +401,11 @@ public class MainActivity extends AppCompatActivity
         int position = drawerAdapter.getPosition(selectedChannel);
         drawerListView.setSelection(position);
         drawerListView.setItemChecked(position, true);
-        if (selectedChannel == null)
+        if (selectedChannel == null) {
             setTitle(R.string.chosen_feed_default);
-        else
+        } else {
             setTitle(selectedChannel.getTitle());
+        }
         refreshNews();
     }
 
@@ -396,5 +420,3 @@ public class MainActivity extends AppCompatActivity
         return sharedPref.getString("chosenFeed", defaultValue);
     }
 }
-
-

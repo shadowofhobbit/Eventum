@@ -12,29 +12,29 @@
         android:supportsRtl="true"
         android:theme="@style/AppBaseTheme">
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ViewPageActivity">
+        <activity android:name=".activities.ViewPageActivity">
 
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="iuliiaponomareva.eventum.MainActivity" />
+                android:value="iuliiaponomareva.eventum.activities.MainActivity" />
         </activity>
 
         <service
-            android:name=".ChannelService"
+            android:name=".async.ChannelService"
             android:exported="false" />
         <service
-            android:name=".ParseChannelService"
+            android:name=".async.ParseChannelService"
             android:exported="false" />
         <service
-            android:name=".NewsService"
+            android:name=".async.NewsService"
             android:exported="false"/>
     </application>
 

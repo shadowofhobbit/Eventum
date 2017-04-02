@@ -9,6 +9,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import iuliiaponomareva.eventum.activities.MainActivity;
+import iuliiaponomareva.eventum.data.DbHelper;
+
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
