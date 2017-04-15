@@ -14,7 +14,7 @@ public class Channel implements Parcelable {
     private String title;
     private String link;
     private String description;
-    private Set<News> news = new TreeSet<>();
+    private Set<News> news = new TreeSet<>(new NewsComparator());
 
     public Channel(String url, String title, String link, String description) {
         this.url = url;

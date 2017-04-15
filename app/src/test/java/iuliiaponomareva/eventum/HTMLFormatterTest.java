@@ -2,7 +2,7 @@ package iuliiaponomareva.eventum;
 
 import junit.framework.Assert;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.text.DateFormat;
 import java.util.Date;

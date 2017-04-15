@@ -8,8 +8,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -17,17 +15,24 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 
 import iuliiaponomareva.eventum.data.Channel;
 import iuliiaponomareva.eventum.data.News;
+import iuliiaponomareva.eventum.data.NewsComparator;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class RSSAndAtomParser {
 
-    private static final int READ_TIMEOUT = 10000;
-    private static final int CONNECT_TIMEOUT = 15000;
+    private static final int READ_TIMEOUT = 10;
+    private static final int CONNECT_TIMEOUT = 15;
 
     private enum Format { RSS, ATOM }
-
+    private final OkHttpClient client = new OkHttpClient.Builder()
+            .connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
+            .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS).build();
     private static final String RSS_FEED_START_TAG = "rss";
     private static final String ATOM_FEED_START_TAG = "feed";
     private static final String NS = null;
@@ -174,16 +179,11 @@ public class RSSAndAtomParser {
     }
 
 
-    private InputStream getInputStream(String urlString) throws IOException {
-        URL url = new URL(urlString);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
-        connection.setDoInput(true);
-        connection.setReadTimeout(READ_TIMEOUT);
-        connection.setConnectTimeout(CONNECT_TIMEOUT);
-        connection.setUseCaches(false);
-        connection.connect();
-        return connection.getInputStream();
+    private InputStream getInputStream(String url) throws IOException {
+        Request request = new Request.Builder().url(url).build();
+        Response response;
+        response = client.newCall(request).execute();
+        return response.body().byteStream();
     }
 
     private String readTag(XmlPullParser parser, String tag) throws IOException,
@@ -199,7 +199,7 @@ public class RSSAndAtomParser {
     }
 
     public Set<News> parseNews(String url) {
-        Set<News> result = new TreeSet<>();
+        Set<News> result = new TreeSet<>(new NewsComparator());
         InputStream stream = null;
         XmlPullParser parser = Xml.newPullParser();
         try {
@@ -228,7 +228,7 @@ public class RSSAndAtomParser {
     }
 
     private Set<News> parseRSSNews(XmlPullParser parser) {
-        Set<News> result = new TreeSet<>();
+        Set<News> result = new TreeSet<>(new NewsComparator());
         try {
 
             while (!((parser.next() == XmlPullParser.END_TAG)
@@ -287,7 +287,7 @@ public class RSSAndAtomParser {
     }
 
     private Set<News> parseAtomNews(XmlPullParser parser) {
-        Set<News> result = new TreeSet<>();
+        Set<News> result = new TreeSet<>(new NewsComparator());
         try {
             while (!((parser.next() == XmlPullParser.END_TAG)
                     && parser.getName().equals(ATOM_FEED_START_TAG))) {

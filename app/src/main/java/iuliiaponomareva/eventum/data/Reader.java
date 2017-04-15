@@ -1,8 +1,6 @@
 package iuliiaponomareva.eventum.data;
 
-import java.io.Serializable;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,18 +23,6 @@ public class Reader {
 
     public void addFeed(MainActivity activity, String... rssURL) {
         ParseChannelService.startActionParseInfo(activity, rssURL);
-    }
-
-    private static class NewsComparator implements Comparator<News>, Serializable {
-
-        @Override
-        public int compare(News news1, News news2) {
-            if ((news1.getPubDate() != null) && (news2.getPubDate() != null)) {
-                return news2.getPubDate().compareTo(news1.getPubDate());
-            } else {
-                return Integer.MAX_VALUE;
-            }
-        }
     }
 
     public void addFeed(Channel channel) {
