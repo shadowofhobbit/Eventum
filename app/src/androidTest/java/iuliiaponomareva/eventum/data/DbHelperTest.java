@@ -5,7 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.support.test.InstrumentationRegistry;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,7 +19,7 @@ public class DbHelperTest {
 
     @Before
     public void deleteDB() {
-        InstrumentationRegistry.getTargetContext().deleteDatabase(DbHelper.DATABASE_NAME);
+        InstrumentationRegistry.getInstrumentation().getTargetContext().deleteDatabase(DbHelper.DATABASE_NAME);
     }
 
     @Test
@@ -28,7 +28,7 @@ public class DbHelperTest {
         SQLiteDatabase database = null;
         Cursor cursor = null;
         try {
-            Context context = InstrumentationRegistry.getTargetContext();
+            Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
             dbHelper = new DbHelper(context);
             database = dbHelper.getWritableDatabase();
             assertTrue(database.isOpen());

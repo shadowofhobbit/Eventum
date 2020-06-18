@@ -12,12 +12,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,20 +24,27 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.DialogFragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import iuliiaponomareva.eventum.data.Channel;
-import iuliiaponomareva.eventum.data.News;
-import iuliiaponomareva.eventum.adapters.NewsArrayAdapter;
 import iuliiaponomareva.eventum.R;
-import iuliiaponomareva.eventum.data.Reader;
+import iuliiaponomareva.eventum.adapters.NewsArrayAdapter;
 import iuliiaponomareva.eventum.async.ChannelService;
 import iuliiaponomareva.eventum.async.ChannelsLoader;
 import iuliiaponomareva.eventum.async.NewsService;
 import iuliiaponomareva.eventum.async.ParseChannelService;
+import iuliiaponomareva.eventum.data.Channel;
+import iuliiaponomareva.eventum.data.News;
+import iuliiaponomareva.eventum.data.Reader;
 import iuliiaponomareva.eventum.fragments.AddFeedDialogFragment;
 import iuliiaponomareva.eventum.fragments.RemoveFeedDialogFragment;
 

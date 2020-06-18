@@ -1,9 +1,10 @@
 package iuliiaponomareva.eventum;
 
 
-import android.support.test.InstrumentationRegistry;
-import android.support.test.rule.ActivityTestRule;
 import android.view.inputmethod.EditorInfo;
+
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.rule.ActivityTestRule;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -12,19 +13,19 @@ import org.junit.Test;
 import iuliiaponomareva.eventum.activities.MainActivity;
 import iuliiaponomareva.eventum.data.DbHelper;
 
-import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.action.ViewActions.click;
-import static android.support.test.espresso.assertion.ViewAssertions.matches;
-import static android.support.test.espresso.matcher.ViewMatchers.hasImeAction;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.matcher.ViewMatchers.hasImeAction;
+import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.core.IsNot.not;
 
 public class MainActivityTest {
     @Before
     public void deleteDB() {
-        InstrumentationRegistry.getTargetContext().deleteDatabase(DbHelper.DATABASE_NAME);
+        InstrumentationRegistry.getInstrumentation().getTargetContext().deleteDatabase(DbHelper.DATABASE_NAME);
     }
 
     @Rule

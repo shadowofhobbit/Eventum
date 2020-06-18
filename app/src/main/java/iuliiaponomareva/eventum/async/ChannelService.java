@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Parcelable;
-import android.support.v4.content.LocalBroadcastManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import java.util.Arrays;
 
