@@ -87,8 +87,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setUpChannelsView() {
-        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawerListView = (ListView) findViewById(R.id.drawer);
+        drawerLayout = findViewById(R.id.drawer_layout);
+        drawerListView = findViewById(R.id.drawer);
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.drawer_open,
                 R.string.drawer_close);
         drawerAdapter = new ArrayAdapter<>(MainActivity.this,
@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setUpNewsView() {
-        newsListView = (ListView) findViewById(R.id.all_news);
+        newsListView = findViewById(R.id.all_news);
         newsListView.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity
         newsAdapter = new NewsArrayAdapter(MainActivity.this, news);
         newsListView.setAdapter(newsAdapter);
         newsListView.setEmptyView(findViewById(R.id.empty_textview));
-        refreshLayout = ((SwipeRefreshLayout) findViewById(R.id.swipe_to_refresh));
+        refreshLayout = findViewById(R.id.swipe_to_refresh);
         refreshLayout.setOnRefreshListener(this);
         newsListView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
@@ -388,7 +388,7 @@ public class MainActivity extends AppCompatActivity
     public void onLoadFinished(Loader<List<Channel>> loader, List<Channel> data) {
         reader.addAll(data);
         drawerAdapter.clear();
-        TextView textView = (TextView) findViewById(R.id.empty_textview);
+        TextView textView = findViewById(R.id.empty_textview);
         if (data.isEmpty()) {
             textView.setText(R.string.no_feeds_added_yet);
         } else {

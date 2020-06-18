@@ -43,7 +43,7 @@ public class NewsArrayAdapter extends ArrayAdapter<News> {
     public NewsArrayAdapter(Context context, List<News> news) {
         super(context, R.layout.news_list_item, news);
         this.context = context;
-        picasso = Picasso.with(context);
+        picasso = Picasso.get();
     }
 
 
@@ -69,7 +69,7 @@ public class NewsArrayAdapter extends ArrayAdapter<News> {
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.news_list_item, parent, false);
             holder = new ViewHolder();
-            holder.textView = (TextView) convertView.findViewById(R.id.news_textview);
+            holder.textView = convertView.findViewById(R.id.news_textview);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -150,7 +150,7 @@ class MyImageGetter implements Html.ImageGetter, Target {
     }
 
     @Override
-    public void onBitmapFailed(Drawable errorDrawable) {
+    public void onBitmapFailed(Exception exception, Drawable errorDrawable) {
 
     }
 

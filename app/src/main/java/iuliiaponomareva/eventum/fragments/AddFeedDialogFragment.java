@@ -1,9 +1,9 @@
 package iuliiaponomareva.eventum.fragments;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -26,12 +26,12 @@ public class AddFeedDialogFragment extends DialogFragment {
     private AddFeedDialogListener listener;
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
         try {
-            listener = (AddFeedDialogListener) activity;
+            listener = (AddFeedDialogListener) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
+            throw new ClassCastException(context.toString()
                     + " must implement AddFeedDialogListener");
         }
     }
@@ -44,7 +44,7 @@ public class AddFeedDialogFragment extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final View view = inflater.inflate(R.layout.add_feed, null);
         builder.setTitle(R.string.add_feed).setMessage(R.string.enter_url).setView(view);
-        final EditText editText = (EditText) view.findViewById(R.id.new_feed_url);
+        final EditText editText = view.findViewById(R.id.new_feed_url);
 
         builder.setPositiveButton(R.string.add_feed, new DialogInterface.OnClickListener() {
             @Override

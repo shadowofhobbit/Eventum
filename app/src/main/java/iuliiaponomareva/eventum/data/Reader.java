@@ -41,13 +41,13 @@ public class Reader {
         return feeds.get(url);
     }
     public String[] getFeeds() {
-        return feeds.keySet().toArray(new String[feeds.size()]);
+        return feeds.keySet().toArray(new String[0]);
     }
     public boolean hasFeed(String url) {
         return feeds.containsKey(url);
     }
     public Channel[] getChannels() {
-        return feeds.values().toArray(new Channel[feeds.size()]);
+        return feeds.values().toArray(new Channel[0]);
     }
 
     public void refreshAllNews(MainActivity activity) {

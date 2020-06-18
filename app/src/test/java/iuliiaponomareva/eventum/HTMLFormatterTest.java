@@ -1,7 +1,5 @@
 package iuliiaponomareva.eventum;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
 
 import java.text.DateFormat;
@@ -10,11 +8,14 @@ import java.util.Date;
 import iuliiaponomareva.eventum.data.News;
 import iuliiaponomareva.eventum.util.HTMLFormatter;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 
 public class HTMLFormatterTest {
 
     @Test
-    public void testFormatNews() throws Exception {
+    public void testFormatNews() {
         String title = "my title";
         String link = "http://www";
         String description = "my description";
@@ -23,10 +24,10 @@ public class HTMLFormatterTest {
         news.setPubDate(date);
 
         String formattedNews = HTMLFormatter.formatNews(news);
-        Assert.assertTrue("No title", formattedNews.contains(title));
+        assertTrue("No title", formattedNews.contains(title));
         String formattedDate = DateFormat.getDateTimeInstance().format(date);
-        Assert.assertTrue("No date in default locale format", formattedNews.contains(formattedDate));
-        Assert.assertTrue("No description", formattedNews.contains(description));
-        Assert.assertFalse("Contains link", formattedNews.contains(link));
+        assertTrue("No date in default locale format", formattedNews.contains(formattedDate));
+        assertTrue("No description", formattedNews.contains(description));
+        assertFalse("Contains link", formattedNews.contains(link));
     }
 }

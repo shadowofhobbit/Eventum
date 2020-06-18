@@ -10,10 +10,10 @@ import java.util.TreeSet;
 
 public class Channel implements Parcelable {
 
-    private String url;
-    private String title;
-    private String link;
-    private String description;
+    private final String url;
+    private final String title;
+    private final String link;
+    private final String description;
     private Set<News> news = new TreeSet<>(new NewsComparator());
 
     public Channel(String url, String title, String link, String description) {

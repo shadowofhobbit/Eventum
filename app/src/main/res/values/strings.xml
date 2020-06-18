@@ -21,5 +21,6 @@
     <string name="chosen_feed_pref_label" translatable="false">chosenFeed</string>
     <string name="rss_link_example" translatable="false">http://www.example.com/rss</string>
     <string name="enter_url">Enter URL</string>
+    <string name="open_in_browser">Open in browser</string>
 
 </resources>

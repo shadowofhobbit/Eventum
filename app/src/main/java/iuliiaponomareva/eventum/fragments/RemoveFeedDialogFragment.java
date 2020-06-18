@@ -1,9 +1,9 @@
 package iuliiaponomareva.eventum.fragments;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -27,7 +27,7 @@ public class RemoveFeedDialogFragment extends DialogFragment {
     private RemoveFeedDialogListener listener;
 
     @Override
-    public void onAttach(Activity activity) {
+    public void onAttach(Context activity) {
         super.onAttach(activity);
         try {
             listener = (RemoveFeedDialogListener) activity;
@@ -36,6 +36,7 @@ public class RemoveFeedDialogFragment extends DialogFragment {
                     + " must implement RemoveFeedDialogListener");
         }
     }
+
     @NonNull
     @SuppressLint("InflateParams")
     @Override
@@ -43,7 +44,7 @@ public class RemoveFeedDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.remove_feed, null);
-        final ListView listView = (ListView) dialogView.findViewById(R.id.feeds_to_remove);
+        final ListView listView = dialogView.findViewById(R.id.feeds_to_remove);
         builder.setTitle(R.string.remove_feed)
                 .setView(dialogView);
         String[] feeds = getArguments().getStringArray(FEEDS);

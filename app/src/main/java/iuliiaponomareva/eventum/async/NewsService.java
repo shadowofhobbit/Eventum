@@ -44,7 +44,7 @@ public class NewsService extends IntentService {
         Intent intent = new Intent(ACTION_BROADCAST_NEWS);
         for (String url : urls) {
             Set<News> news = parser.parseNews(url);
-            intent.putExtra(url, news.toArray(new News[news.size()]));
+            intent.putExtra(url, news.toArray(new News[0]));
         }
         intent.putExtra(URLS, urls);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);

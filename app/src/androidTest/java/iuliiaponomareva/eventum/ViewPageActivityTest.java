@@ -17,18 +17,21 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Objects;
+
 import iuliiaponomareva.eventum.activities.MainActivity;
 import iuliiaponomareva.eventum.activities.ViewPageActivity;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
-import static android.support.test.espresso.core.deps.guava.base.Preconditions.checkArgument;
-import static android.support.test.espresso.core.deps.guava.base.Preconditions.checkNotNull;
 import static android.support.test.espresso.matcher.RootMatchers.withDecorView;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
+
+import static android.support.v4.util.Preconditions.checkArgument;
+import static android.support.v4.util.Preconditions.checkNotNull;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.StringStartsWith.startsWith;
@@ -66,8 +69,9 @@ public class ViewPageActivityTest {
 
         ClipboardManager clipboardManager = (ClipboardManager) rule.getActivity().
                 getSystemService(Context.CLIPBOARD_SERVICE);
-        checkArgument(clipboardManager.hasPrimaryClip(), "Nothing copied");
+        checkArgument(Objects.requireNonNull(clipboardManager).hasPrimaryClip(), "Nothing copied");
         ClipData clipData = clipboardManager.getPrimaryClip();
+        assert clipData != null;
         onView(withId(R.id.full_news)).check(
                 matches(withUrl(clipData.getItemAt(0).getText().toString())));
     }

@@ -51,7 +51,7 @@ public class ParseChannelService extends IntentService {
             }
         }
         Intent intent = new Intent(ACTION_BROADCAST_CHANNELS);
-        intent.putExtra(NEW_CHANNELS, newChannels.toArray(new Channel[newChannels.size()]));
+        intent.putExtra(NEW_CHANNELS, newChannels.toArray(new Channel[0]));
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 

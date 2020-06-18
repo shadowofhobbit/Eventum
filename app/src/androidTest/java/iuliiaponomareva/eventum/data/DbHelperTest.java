@@ -13,7 +13,6 @@ import org.junit.Test;
 import java.util.HashSet;
 import java.util.Set;
 
-import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
 public class DbHelperTest {
@@ -32,7 +31,7 @@ public class DbHelperTest {
             Context context = InstrumentationRegistry.getTargetContext();
             dbHelper = new DbHelper(context);
             database = dbHelper.getWritableDatabase();
-            assertEquals(true, database.isOpen());
+            assertTrue(database.isOpen());
 
             cursor = database.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null);
             assertTrue("The database has not been created correctly", cursor.moveToFirst());

@@ -18,5 +18,6 @@
     <string name="all_feeds">Todo</string>
     <string name="no_feeds_added_yet">No hay fuentes para mostrar. Añade algo.</string>
     <string name="enter_url">Escribe la URL</string>
+    <string name="open_in_browser">Abrir en el navegador</string>
 
 </resources>

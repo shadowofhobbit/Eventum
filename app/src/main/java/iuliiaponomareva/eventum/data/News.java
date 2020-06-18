@@ -11,9 +11,9 @@ import iuliiaponomareva.eventum.util.HTMLFormatter;
 
 public class News implements Parcelable {
 
-    private String title;
-    private String link;
-    private String description;
+    private final String title;
+    private final String link;
+    private final String description;
     private Date pubDate;
 
     public News(String title, String link, String description) {

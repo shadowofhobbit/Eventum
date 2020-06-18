@@ -3,6 +3,7 @@ package iuliiaponomareva.eventum.activities;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -24,7 +25,7 @@ public class ViewPageActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-        WebView webView = (WebView) findViewById(R.id.full_news);
+        WebView webView = findViewById(R.id.full_news);
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
@@ -33,6 +34,7 @@ public class ViewPageActivity extends AppCompatActivity {
             }
         });
         configureZoom(webView);
+        webView.getSettings().setAllowFileAccess(false);
         Intent intent = getIntent();
         url = intent.getStringExtra(MainActivity.NEWS_LINK);
         webView.loadUrl(url);
@@ -54,6 +56,10 @@ public class ViewPageActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.copyLink) {
             copyLink();
+            return true;
+        } else if (item.getItemId() == R.id.openInBrowser) {
+            Intent openBrowserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            startActivity(openBrowserIntent);
             return true;
         }
         return super.onOptionsItemSelected(item);
