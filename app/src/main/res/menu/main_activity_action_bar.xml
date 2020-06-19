@@ -4,13 +4,13 @@
 
     <item
         android:id="@+id/addFeedItem"
-        android:title="@string/add_feed"
         android:icon="@drawable/ic_add"
+        android:title="@string/add_feed"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/removeFeedItem"
-        android:title="@string/remove_feed"
         android:icon="@drawable/ic_remove"
-        app:showAsAction="ifRoom"/>
+        android:title="@string/remove_feed"
+        app:showAsAction="ifRoom" />
 
 </menu>
