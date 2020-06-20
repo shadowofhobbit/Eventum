@@ -1,5 +1,6 @@
 package iuliiaponomareva.eventum.activities;
 
+import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
@@ -19,6 +20,7 @@ public class ViewPageActivity extends AppCompatActivity {
     private static final String URL = "URL";
     private String url;
 
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +38,7 @@ public class ViewPageActivity extends AppCompatActivity {
         });
         configureZoom(webView);
         webView.getSettings().setAllowFileAccess(false);
+        webView.getSettings().setJavaScriptEnabled(true);
         Intent intent = getIntent();
         url = intent.getStringExtra(MainActivity.NEWS_LINK);
         webView.loadUrl(url);
