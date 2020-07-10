@@ -1,7 +1,8 @@
 package iuliiaponomareva.eventum.util;
 
-import androidx.annotation.NonNull;
 import android.util.Xml;
+
+import androidx.annotation.NonNull;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -263,8 +264,6 @@ public class RSSAndAtomParser {
                         title = readTag(parser, name);
                         break;
                     case "description":
-                        description = readTag(parser, name);
-                        break;
                     case "summary":
                         description = readTag(parser, name);
                         break;
@@ -315,8 +314,6 @@ public class RSSAndAtomParser {
                         title = readTag(parser, name);
                         break;
                     case "summary":
-                        description = readTag(parser, name);
-                        break;
                     case "description":
                         description = readTag(parser, name);
                         break;
