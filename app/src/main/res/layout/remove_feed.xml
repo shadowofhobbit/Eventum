@@ -4,7 +4,7 @@
     android:orientation="vertical">
 
     <ListView
-        android:id="@+id/feeds_to_remove"
+        android:id="@+id/feedsListView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
@@ -13,7 +13,7 @@
         android:listSelector="@color/actionbar_background"/>
 
     <TextView
-        android:id="@+id/no_feeds_view"
+        android:id="@+id/noFeedsView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
