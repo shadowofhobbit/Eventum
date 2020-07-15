@@ -1,6 +1,5 @@
 package iuliiaponomareva.eventum.activities
 
-import android.app.LoaderManager
 import android.content.*
 import android.content.res.Configuration
 import android.net.ConnectivityManager
@@ -16,14 +15,15 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener
+import iuliiaponomareva.eventum.ChannelRepository
 import iuliiaponomareva.eventum.R
 import iuliiaponomareva.eventum.adapters.NewsArrayAdapter
 import iuliiaponomareva.eventum.async.ChannelService
 import iuliiaponomareva.eventum.async.ChannelService.Companion.startActionDelete
 import iuliiaponomareva.eventum.async.ChannelService.Companion.startActionSave
-import iuliiaponomareva.eventum.async.ChannelsLoader
 import iuliiaponomareva.eventum.async.NewsService
 import iuliiaponomareva.eventum.async.ParseChannelService
 import iuliiaponomareva.eventum.data.Channel
@@ -38,8 +38,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
 class MainActivity : AppCompatActivity(), AddFeedDialogListener,
-    RemoveFeedDialogListener, OnRefreshListener,
-    LoaderManager.LoaderCallbacks<List<Channel>> {
+    RemoveFeedDialogListener, OnRefreshListener {
     private lateinit var reader: Reader
     private lateinit var drawerAdapter: ArrayAdapter<Channel>
     private lateinit var news: MutableList<News>
@@ -48,6 +47,7 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
     private var selectedChannel: Channel? = null
     private lateinit var all: Channel
     private var receiver: BroadcastReceiver? = null
+    private lateinit var viewModel: ChannelViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -63,7 +63,12 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
         setUpChannelsView()
         setUpNewsView()
         createBroadcastReceiver()
-        loaderManager
+        val repository = ChannelRepository(applicationContext)
+        viewModel = ViewModelProvider(this, ChannelViewModelFactory(repository))
+            .get(ChannelViewModel::class.java)
+        viewModel.getChannels().observe(this, androidx.lifecycle.Observer {
+            onLoadFinished(it)
+        })
     }
 
     private fun setUpChannelsView() {
@@ -152,10 +157,9 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
                             )
                         notifyAboutNewChannel(newChannels)
                     }
-                    ChannelService.ACTION_CHANNELS_CHANGED -> loaderManager.restartLoader(
-                        CHANNEL_LOADER_ID, Bundle.EMPTY,
-                        this@MainActivity
-                    )
+                    ChannelService.ACTION_CHANNELS_CHANGED -> {
+                        viewModel.onChannelsChanged()
+                    }
                     NewsService.ACTION_BROADCAST_NEWS -> {
                         val urls =
                             intent.getStringArrayExtra(NewsService.URLS)!!
@@ -260,11 +264,6 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        loaderManager.restartLoader(CHANNEL_LOADER_ID, Bundle.EMPTY, this)
-    }
-
     override fun addChosenFeed(feedUrl: String) {
         if (isConnectedToNetwork) {
             val checkedUrl = checkURL(feedUrl)
@@ -284,7 +283,6 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
             for (channel in newChannels) {
                 reader.addFeed(channel)
             }
-            loaderManager.restartLoader(CHANNEL_LOADER_ID, Bundle.EMPTY, this)
         } else {
             createToast(R.string.error_adding_feed)
         }
@@ -354,17 +352,8 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
         drawerLayout.removeDrawerListener(drawerToggle)
     }
 
-    override fun onCreateLoader(
-        id: Int,
-        args: Bundle
-    ): Loader<List<Channel>> {
-        return ChannelsLoader(this@MainActivity, reader)
-    }
 
-    override fun onLoadFinished(
-        loader: Loader<List<Channel>>,
-        data: List<Channel>
-    ) {
+    private fun onLoadFinished(data: List<Channel>) {
         reader.addAll(data)
         drawerAdapter.clear()
         if (data.isEmpty()) {
@@ -387,7 +376,6 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
         refreshNews()
     }
 
-    override fun onLoaderReset(loader: Loader<List<Channel>>) {}
     private val selectedFeedFromPreferences: String
         get() {
             val sharedPref = getPreferences(Context.MODE_PRIVATE)
@@ -399,6 +387,5 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
         private const val ADD_FEED_FRAGMENT_TAG = "addNewFeed"
         private const val REMOVE_FEED_FRAGMENT_TAG = "removeFeed"
         const val NEWS_LINK = "iuliiaponomareva.eventum.NEWS_LINK"
-        private const val CHANNEL_LOADER_ID = 0
     }
 }
