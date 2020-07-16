@@ -24,14 +24,10 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener
 import iuliiaponomareva.eventum.ChannelRepository
 import iuliiaponomareva.eventum.R
 import iuliiaponomareva.eventum.adapters.NewsArrayAdapter
-import iuliiaponomareva.eventum.async.ChannelService
-import iuliiaponomareva.eventum.async.ChannelService.Companion.startActionSave
 import iuliiaponomareva.eventum.async.NewsService
-import iuliiaponomareva.eventum.async.ParseChannelService
 import iuliiaponomareva.eventum.data.Channel
 import iuliiaponomareva.eventum.data.News
 import iuliiaponomareva.eventum.data.Reader
-import iuliiaponomareva.eventum.data.Reader.Companion.checkURL
 import iuliiaponomareva.eventum.fragments.AddFeedDialogFragment
 import iuliiaponomareva.eventum.fragments.AddFeedDialogFragment.AddFeedDialogListener
 import iuliiaponomareva.eventum.fragments.RemoveFeedDialogFragment
@@ -70,6 +66,12 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
             .get(ChannelViewModel::class.java)
         viewModel.getChannels().observe(this, androidx.lifecycle.Observer {
             onLoadFinished(it)
+        })
+        viewModel.error.observe(this, androidx.lifecycle.Observer {
+            when (val error = it.getEventIfNotHandled()) {
+                ChannelError.ALREADY_EXISTS -> createToast(error.url + " " + getString(R.string.has_already_been_added))
+                ChannelError.ERROR_ADDING -> createToast(R.string.error_adding_feed)
+            }
         })
     }
 
@@ -148,20 +150,6 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
                 intent: Intent
             ) {
                 when (intent.action) {
-                    ParseChannelService.ACTION_BROADCAST_CHANNELS -> {
-                        val parcelables = intent.getParcelableArrayExtra(
-                            ParseChannelService.NEW_CHANNELS
-                        )!!
-                        val newChannels =
-                            Arrays.copyOf(
-                                parcelables, parcelables.size,
-                                Array<Channel>::class.java
-                            )
-                        notifyAboutNewChannel(newChannels)
-                    }
-                    ChannelService.ACTION_CHANNELS_CHANGED -> {
-                        viewModel.onChannelsChanged()
-                    }
                     NewsService.ACTION_BROADCAST_NEWS -> {
                         val urls =
                             intent.getStringArrayExtra(NewsService.URLS)!!
@@ -236,9 +224,7 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
 
     override fun onResume() {
         super.onResume()
-        val intentFilter = IntentFilter(ParseChannelService.ACTION_BROADCAST_CHANNELS)
-        intentFilter.addAction(NewsService.ACTION_BROADCAST_NEWS)
-        intentFilter.addAction(ChannelService.ACTION_CHANNELS_CHANGED)
+        val intentFilter = IntentFilter(NewsService.ACTION_BROADCAST_NEWS)
         LocalBroadcastManager.getInstance(this).registerReceiver(
             receiver!!,
             intentFilter
@@ -268,25 +254,9 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
 
     override fun addChosenFeed(feedUrl: String) {
         if (isConnectedToNetwork) {
-            val checkedUrl = checkURL(feedUrl)
-            if (reader.hasFeed(checkedUrl)) {
-                createToast(checkedUrl + " " + getString(R.string.has_already_been_added))
-            } else {
-                reader.addFeed(this, checkedUrl)
-            }
+            viewModel.addChannel(feedUrl)
         } else {
             createToast(R.string.no_internet)
-        }
-    }
-
-    private fun notifyAboutNewChannel(newChannels: Array<Channel>?) {
-        if (newChannels != null && newChannels.isNotEmpty()) {
-            startActionSave(this, newChannels)
-            for (channel in newChannels) {
-                reader.addFeed(channel)
-            }
-        } else {
-            createToast(R.string.error_adding_feed)
         }
     }
 

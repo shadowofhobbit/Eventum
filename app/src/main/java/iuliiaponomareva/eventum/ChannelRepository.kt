@@ -1,5 +1,6 @@
 package iuliiaponomareva.eventum
 
+import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
@@ -8,11 +9,16 @@ import androidx.core.database.sqlite.transaction
 import iuliiaponomareva.eventum.data.Channel
 import iuliiaponomareva.eventum.data.DbHelper
 import iuliiaponomareva.eventum.data.FeedReaderContract
+import iuliiaponomareva.eventum.util.RSSAndAtomParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.ArrayList
 
 class ChannelRepository(val context: Context) {
+    private val parser: RSSAndAtomParser by lazy {
+        RSSAndAtomParser()
+    }
+
     suspend fun load(): List<Channel> {
         return withContext(Dispatchers.IO) {
             var dbHelper: DbHelper? = null
@@ -72,6 +78,36 @@ class ChannelRepository(val context: Context) {
             }
             Log.wtf("eventum", "${Thread.currentThread().id} ${Thread.currentThread().name} should not be main")
             feeds
+        }
+    }
+
+
+    suspend fun add(url: String): Channel? {
+        return withContext(Dispatchers.IO) {
+            val channel = parser.parseChannelInfo(url)
+            channel?.let {
+                var dbHelper: DbHelper? = null
+                var db: SQLiteDatabase? = null
+                try {
+                    dbHelper = DbHelper(context)
+                    db = dbHelper.writableDatabase
+                    db.transaction {
+                        val values = ContentValues()
+                        values.put(FeedReaderContract.Feeds.COLUMN_NAME_FEED_URL, channel.url)
+                        values.put(FeedReaderContract.Feeds.COLUMN_NAME_TITLE, channel.title)
+                        values.put(FeedReaderContract.Feeds.COLUMN_NAME_LINK, channel.link)
+                        values.put(
+                            FeedReaderContract.Feeds.COLUMN_NAME_DESCRIPTION,
+                            channel.description
+                        )
+                        db.insert(FeedReaderContract.Feeds.TABLE_NAME, null, values)
+                    }
+                } finally {
+                    db?.close()
+                    dbHelper?.close()
+                }
+            }
+            channel
         }
     }
 

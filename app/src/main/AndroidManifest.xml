@@ -29,12 +29,6 @@
         </activity>
 
         <service
-            android:name=".async.ChannelService"
-            android:exported="false" />
-        <service
-            android:name=".async.ParseChannelService"
-            android:exported="false" />
-        <service
             android:name=".async.NewsService"
             android:exported="false"/>
     </application>

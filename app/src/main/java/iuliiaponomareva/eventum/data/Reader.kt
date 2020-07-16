@@ -2,17 +2,13 @@ package iuliiaponomareva.eventum.data
 
 import iuliiaponomareva.eventum.activities.MainActivity
 import iuliiaponomareva.eventum.async.NewsService
-import iuliiaponomareva.eventum.async.ParseChannelService
 import java.util.*
 
 class Reader {
     private val feeds: MutableMap<String, Channel>
     val allNews: MutableSet<News>
-    fun addFeed(activity: MainActivity, rssURL: String) {
-        ParseChannelService.startActionParseInfo(activity, arrayOf(rssURL))
-    }
 
-    fun addFeed(channel: Channel) {
+    private fun addFeed(channel: Channel) {
         feeds[channel.url] = channel
     }
 
@@ -32,13 +28,6 @@ class Reader {
     fun getFeeds(): Array<String> {
         return feeds.keys.toTypedArray()
     }
-
-    fun hasFeed(url: String): Boolean {
-        return feeds.containsKey(url)
-    }
-
-    val channels: Array<Channel>
-        get() = feeds.values.toTypedArray()
 
     fun refreshAllNews(activity: MainActivity) {
         NewsService.startActionLoadNews(activity, getFeeds())
@@ -66,15 +55,6 @@ class Reader {
         }
     }
 
-    companion object {
-        @JvmStatic
-        fun checkURL(url: String): String {
-            if (!url.startsWith("http")) {
-                return "http://$url"
-            }
-            return url
-        }
-    }
 
     init {
         feeds = HashMap()
