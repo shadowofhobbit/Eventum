@@ -36,7 +36,7 @@ class NewsArrayAdapter(
     }
 
     fun cancel() {
-        picasso.cancelTag(channelURL!!)
+        channelURL?.let { picasso.cancelTag(it) }
     }
 
     override fun getView(
