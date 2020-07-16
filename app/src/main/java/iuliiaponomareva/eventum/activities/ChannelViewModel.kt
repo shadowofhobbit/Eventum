@@ -8,7 +8,7 @@ import kotlinx.coroutines.launch
 class ChannelViewModel(private val repository: ChannelRepository) : ViewModel() {
     private val channels: MutableLiveData<List<Channel>> by lazy {
         MutableLiveData<List<Channel>>().also {
-            loadChannels()
+            launchLoadingChannels()
         }
     }
 
@@ -16,13 +16,24 @@ class ChannelViewModel(private val repository: ChannelRepository) : ViewModel() 
         return channels
     }
 
-    fun onChannelsChanged() = loadChannels()
+    fun onChannelsChanged() = launchLoadingChannels()
 
-    private fun loadChannels() {
+    fun deleteChannel(channel: Channel) {
         viewModelScope.launch {
-            val loadedChannels = repository.load()
-            channels.postValue(loadedChannels)
+            repository.delete(channel.url)
+            loadChannels()
         }
+    }
+
+    private fun launchLoadingChannels() {
+        viewModelScope.launch {
+            loadChannels()
+        }
+    }
+
+    private suspend fun loadChannels() {
+        val loadedChannels = repository.load()
+        channels.postValue(loadedChannels)
     }
 
 }

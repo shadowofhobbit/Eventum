@@ -1,6 +1,9 @@
 package iuliiaponomareva.eventum.activities
 
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.Configuration
 import android.net.ConnectivityManager
 import android.os.Bundle
@@ -22,7 +25,6 @@ import iuliiaponomareva.eventum.ChannelRepository
 import iuliiaponomareva.eventum.R
 import iuliiaponomareva.eventum.adapters.NewsArrayAdapter
 import iuliiaponomareva.eventum.async.ChannelService
-import iuliiaponomareva.eventum.async.ChannelService.Companion.startActionDelete
 import iuliiaponomareva.eventum.async.ChannelService.Companion.startActionSave
 import iuliiaponomareva.eventum.async.NewsService
 import iuliiaponomareva.eventum.async.ParseChannelService
@@ -300,14 +302,15 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
         toast.show()
     }
 
-    override fun removeChosenFeed(feed: String) {
-        if (selectedChannel != null && selectedChannel?.url == feed) {
+    override fun removeChosenFeed(url: String) {
+        if (selectedChannel?.url == url) {
             selectedChannel = all
         }
-        drawerAdapter.remove(reader.getFeed(feed))
-        reader.removeFeed(feed)
+        val feed = reader.getFeed(url)
+        drawerAdapter.remove(feed)
+        reader.removeFeed(url)
         drawerAdapter.notifyDataSetChanged()
-        startActionDelete(this, feed)
+        viewModel.deleteChannel(feed!!)
     }
 
     private val isConnectedToNetwork: Boolean

@@ -26,10 +26,6 @@ class ChannelService : IntentService("ChannelService") {
                         Array<Channel>::class.java
                     )
                 handleActionSave(newChannels)
-            } else if (ACTION_DELETE == action) {
-                val url =
-                    intent.getStringExtra(URL_TO_DELETE)
-                handleActionDelete(url)
             }
             val broadcastIntent = Intent(ACTION_CHANNELS_CHANGED)
             LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent)
@@ -61,29 +57,12 @@ class ChannelService : IntentService("ChannelService") {
         }
     }
 
-    private fun handleActionDelete(url: String?) {
-        var dbHelper: DbHelper? = null
-        var db: SQLiteDatabase? = null
-        try {
-            dbHelper = DbHelper(this)
-            db = dbHelper.writableDatabase
-            db.delete(
-                FeedReaderContract.Feeds.TABLE_NAME,
-                FeedReaderContract.Feeds.COLUMN_NAME_FEED_URL + "= '" + url + "'", null
-            )
-        } finally {
-            db?.close()
-            dbHelper?.close()
-        }
-    }
-
     companion object {
         private const val ACTION_SAVE = "iuliiaponomareva.eventum.action.SAVE"
-        private const val ACTION_DELETE = "iuliiaponomareva.eventum.action.DELETE"
         const val ACTION_CHANNELS_CHANGED =
             "iuliiaponomareva.eventum.action.CHANNELS_CHANGED"
         private const val NEW_CHANNELS = "iuliiaponomareva.eventum.extra.NEW_CHANNELS"
-        private const val URL_TO_DELETE = "iuliiaponomareva.eventum.extra.URL_TO_DELETE"
+
         @JvmStatic
         fun startActionSave(
             context: Context,
@@ -95,15 +74,5 @@ class ChannelService : IntentService("ChannelService") {
             context.startService(intent)
         }
 
-        @JvmStatic
-        fun startActionDelete(
-            context: Context,
-            urlToDelete: String
-        ) {
-            val intent = Intent(context, ChannelService::class.java)
-            intent.action = ACTION_DELETE
-            intent.putExtra(URL_TO_DELETE, urlToDelete)
-            context.startService(intent)
-        }
     }
 }

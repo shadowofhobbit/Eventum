@@ -4,6 +4,7 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
+import androidx.core.database.sqlite.transaction
 import iuliiaponomareva.eventum.data.Channel
 import iuliiaponomareva.eventum.data.DbHelper
 import iuliiaponomareva.eventum.data.FeedReaderContract
@@ -71,6 +72,26 @@ class ChannelRepository(val context: Context) {
             }
             Log.wtf("eventum", "${Thread.currentThread().id} ${Thread.currentThread().name} should not be main")
             feeds
+        }
+    }
+
+    suspend fun delete(url: String) {
+        withContext(Dispatchers.IO) {
+            var dbHelper: DbHelper? = null
+            var db: SQLiteDatabase? = null
+            try {
+                dbHelper = DbHelper(context)
+                db = dbHelper.writableDatabase
+                db.transaction {
+                    db.delete(
+                        FeedReaderContract.Feeds.TABLE_NAME,
+                        "${FeedReaderContract.Feeds.COLUMN_NAME_FEED_URL}= ?", arrayOf(url)
+                    )
+                }
+            } finally {
+                db?.close()
+                dbHelper?.close()
+            }
         }
     }
 }
