@@ -5,7 +5,8 @@ package iuliiaponomareva.eventum.viewModels
  */
 class Event<out T>(private val content: T) {
 
-    private var handled = false
+    var handled = false
+    private set
 
     fun getEventIfNotHandled(): T? {
         return if (!handled) {
@@ -15,4 +16,11 @@ class Event<out T>(private val content: T) {
             null
         }
     }
+
+    fun getEvent(): T {
+        handled = true
+        return content
+    }
+
+
 }

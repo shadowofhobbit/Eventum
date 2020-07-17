@@ -6,8 +6,8 @@ import iuliiaponomareva.eventum.data.Channel
 import kotlinx.coroutines.launch
 
 class ChannelViewModel(private val repository: ChannelRepository) : ViewModel() {
-    private val channels: MutableLiveData<List<Channel>> by lazy {
-        MutableLiveData<List<Channel>>().also {
+    private val channels: MutableLiveData<Event<List<Channel>>> by lazy {
+        MutableLiveData<Event<List<Channel>>>().also {
             launchLoadingChannels()
         }
     }
@@ -16,13 +16,13 @@ class ChannelViewModel(private val repository: ChannelRepository) : ViewModel() 
     val error: LiveData<Event<ChannelError>>
         get() = _error
 
-    fun getChannels(): LiveData<List<Channel>> {
+    fun getChannels(): LiveData<Event<List<Channel>>> {
         return channels
     }
 
     fun addChannel(url: String) {
         val checkedUrl = checkURL(url)
-        if (channels.value?.map {it.url } ?.contains(checkedUrl) == true) {
+        if (channels.value?.getEventIfNotHandled()?.map {it.url } ?.contains(checkedUrl) == true) {
             val alreadyExists = ChannelError.ALREADY_EXISTS
             alreadyExists.url = checkedUrl
             _error.postValue(Event(alreadyExists))
@@ -53,7 +53,7 @@ class ChannelViewModel(private val repository: ChannelRepository) : ViewModel() 
 
     private suspend fun loadChannels() {
         val loadedChannels = repository.load()
-        channels.postValue(loadedChannels)
+        channels.postValue(Event(loadedChannels))
     }
 
     private fun checkURL(url: String): String {

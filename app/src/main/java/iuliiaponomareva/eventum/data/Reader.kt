@@ -1,21 +1,19 @@
 package iuliiaponomareva.eventum.data
 
 import java.util.*
+import kotlin.collections.HashMap
 
 class Reader {
-    private val feeds: MutableMap<String, Channel>
-    val allNews: MutableSet<News>
+    private val feeds: MutableMap<String, Channel> = HashMap()
+    private val _allNews: MutableSet<News> = TreeSet(NewsComparator())
+    val allNews: Set<News>
+        get() = _allNews
 
-    private fun addFeed(channel: Channel) {
-        feeds[channel.url] = channel
-    }
 
     fun removeFeed(rssURL: String) {
         val feed = feeds.remove(rssURL)
         if (feed != null) {
-            for (news in feed.news) {
-                allNews.remove(news)
-            }
+            _allNews.removeAll(feed.news)
         }
     }
 
@@ -29,7 +27,7 @@ class Reader {
 
     fun finishRefreshing(res: Array<News>?, url: String) {
         if (res != null) {
-            Collections.addAll(allNews, *res)
+            Collections.addAll(_allNews, *res)
             val feed = feeds[url]
             feed?.setNews(res)
         }
@@ -41,13 +39,7 @@ class Reader {
 
     fun addAll(data: List<Channel>) {
         for (channel in data) {
-            addFeed(channel)
+            feeds[channel.url] = channel
         }
-    }
-
-
-    init {
-        feeds = HashMap()
-        allNews = TreeSet(NewsComparator())
     }
 }

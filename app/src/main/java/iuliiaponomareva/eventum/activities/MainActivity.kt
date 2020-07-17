@@ -50,7 +50,6 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        reader = Reader()
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
         all = Channel(
@@ -68,9 +67,12 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
             )
         )
             .get(ChannelViewModel::class.java)
-        channelsViewModel.getChannels().observe(this, androidx.lifecycle.Observer {
+        newsViewModel = ViewModelProvider(this)[NewsViewModel::class.java]
+        reader = newsViewModel.reader
+        channelsViewModel.getChannels().observe(this, androidx.lifecycle.Observer { event ->
             Log.wtf("eventum", "channels changed")
-            onLoadFinished(it)
+            val handled = event.handled
+            onChannelsLoaded(event.getEvent(), refreshNews = !handled)
         })
         channelsViewModel.error.observe(this, androidx.lifecycle.Observer {
             when (val error = it.getEventIfNotHandled()) {
@@ -78,7 +80,6 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
                 ChannelError.ERROR_ADDING -> createToast(R.string.error_adding_feed)
             }
         })
-        newsViewModel = ViewModelProvider(this)[NewsViewModel::class.java]
         newsViewModel.news.observe(this, androidx.lifecycle.Observer {newsMap ->
             for (url in newsMap.keys) {
                 reader.finishRefreshing(newsMap[url]?.toTypedArray(), url)
@@ -294,7 +295,7 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
     }
 
 
-    private fun onLoadFinished(data: List<Channel>) {
+    private fun onChannelsLoaded(data: List<Channel>, refreshNews: Boolean = true) {
         reader.addAll(data)
         drawerAdapter.clear()
         if (data.isEmpty()) {
@@ -314,7 +315,9 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
         } else {
             title = selectedChannel!!.title
         }
-        refreshNews()
+        if (refreshNews) {
+            refreshNews()
+        }
     }
 
     private val selectedFeedFromPreferences: String
