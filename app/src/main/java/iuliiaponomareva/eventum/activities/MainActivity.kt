@@ -1,12 +1,11 @@
 package iuliiaponomareva.eventum.activities
 
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.res.Configuration
 import android.net.ConnectivityManager
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
@@ -19,12 +18,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener
 import iuliiaponomareva.eventum.ChannelRepository
 import iuliiaponomareva.eventum.R
 import iuliiaponomareva.eventum.adapters.NewsArrayAdapter
-import iuliiaponomareva.eventum.async.NewsService
 import iuliiaponomareva.eventum.data.Channel
 import iuliiaponomareva.eventum.data.News
 import iuliiaponomareva.eventum.data.Reader
@@ -32,6 +29,10 @@ import iuliiaponomareva.eventum.fragments.AddFeedDialogFragment
 import iuliiaponomareva.eventum.fragments.AddFeedDialogFragment.AddFeedDialogListener
 import iuliiaponomareva.eventum.fragments.RemoveFeedDialogFragment
 import iuliiaponomareva.eventum.fragments.RemoveFeedDialogFragment.RemoveFeedDialogListener
+import iuliiaponomareva.eventum.viewModels.ChannelError
+import iuliiaponomareva.eventum.viewModels.ChannelViewModel
+import iuliiaponomareva.eventum.viewModels.ChannelViewModelFactory
+import iuliiaponomareva.eventum.viewModels.NewsViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
@@ -44,8 +45,8 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
     private lateinit var drawerToggle: ActionBarDrawerToggle
     private var selectedChannel: Channel? = null
     private lateinit var all: Channel
-    private var receiver: BroadcastReceiver? = null
-    private lateinit var viewModel: ChannelViewModel
+    private lateinit var channelsViewModel: ChannelViewModel
+    private lateinit var newsViewModel: NewsViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -60,17 +61,32 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
         )
         setUpChannelsView()
         setUpNewsView()
-        createBroadcastReceiver()
         val repository = ChannelRepository(applicationContext)
-        viewModel = ViewModelProvider(this, ChannelViewModelFactory(repository))
+        channelsViewModel = ViewModelProvider(this,
+            ChannelViewModelFactory(
+                repository
+            )
+        )
             .get(ChannelViewModel::class.java)
-        viewModel.getChannels().observe(this, androidx.lifecycle.Observer {
+        channelsViewModel.getChannels().observe(this, androidx.lifecycle.Observer {
+            Log.wtf("eventum", "channels changed")
             onLoadFinished(it)
         })
-        viewModel.error.observe(this, androidx.lifecycle.Observer {
+        channelsViewModel.error.observe(this, androidx.lifecycle.Observer {
             when (val error = it.getEventIfNotHandled()) {
                 ChannelError.ALREADY_EXISTS -> createToast(error.url + " " + getString(R.string.has_already_been_added))
                 ChannelError.ERROR_ADDING -> createToast(R.string.error_adding_feed)
+            }
+        })
+        newsViewModel = ViewModelProvider(this)[NewsViewModel::class.java]
+        newsViewModel.news.observe(this, androidx.lifecycle.Observer {newsMap ->
+            for (url in newsMap.keys) {
+                reader.finishRefreshing(newsMap[url]!!.toTypedArray(), url)
+            }
+            if (newsMap.size == 1) {
+                showNews(reader.getNewsFromFeed(newsMap.keys.first()))
+            } else {
+                showNews(reader.allNews)
             }
         })
     }
@@ -96,9 +112,9 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
             news.clear()
             if (isConnectedToNetwork) {
                 if (selectedChannel == all) {
-                    reader.refreshAllNews(this@MainActivity)
+                    newsViewModel.refreshNews(reader.getFeeds())
                 } else {
-                    reader.refreshNewsFromFeed(selectedFeed, this@MainActivity)
+                    newsViewModel.refreshNews(arrayOf(selectedChannel!!.url))
                 }
             } else {
                 if (selectedChannel == all) {
@@ -141,38 +157,6 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
                 refreshLayout.isEnabled = firstVisibleItem == 0 && topRowVerticalPosition >= 0
             }
         })
-    }
-
-    private fun createBroadcastReceiver() {
-        receiver = object : BroadcastReceiver() {
-            override fun onReceive(
-                context: Context,
-                intent: Intent
-            ) {
-                when (intent.action) {
-                    NewsService.ACTION_BROADCAST_NEWS -> {
-                        val urls =
-                            intent.getStringArrayExtra(NewsService.URLS)!!
-                        for (url in urls) {
-                            val parcelables2 =
-                                intent.getParcelableArrayExtra(url)!!
-                            val news = Arrays.copyOf(
-                                parcelables2, parcelables2.size,
-                                Array<News>::class.java
-                            )
-                            reader.finishRefreshing(news, url)
-                        }
-                        if (urls.size == 1) {
-                            showNews(reader.getNewsFromFeed(urls[0]))
-                        } else {
-                            showNews(reader.allNews)
-                        }
-                    }
-                    else -> {
-                    }
-                }
-            }
-        }
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
@@ -222,22 +206,6 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
         )
     }
 
-    override fun onResume() {
-        super.onResume()
-        val intentFilter = IntentFilter(NewsService.ACTION_BROADCAST_NEWS)
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-            receiver!!,
-            intentFilter
-        )
-    }
-
-    override fun onPause() {
-        super.onPause()
-        if (receiver != null) {
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver!!)
-        }
-    }
-
     override fun onStop() {
         super.onStop()
         saveSelectedChannel()
@@ -254,7 +222,7 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
 
     override fun addChosenFeed(feedUrl: String) {
         if (isConnectedToNetwork) {
-            viewModel.addChannel(feedUrl)
+            channelsViewModel.addChannel(feedUrl)
         } else {
             createToast(R.string.no_internet)
         }
@@ -280,7 +248,7 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
         drawerAdapter.remove(feed)
         reader.removeFeed(url)
         drawerAdapter.notifyDataSetChanged()
-        viewModel.deleteChannel(feed!!)
+        channelsViewModel.deleteChannel(feed!!)
     }
 
     private val isConnectedToNetwork: Boolean
@@ -303,9 +271,9 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
         if (isConnectedToNetwork) {
             news.clear()
             if (selectedChannel == all) {
-                reader.refreshAllNews(this)
+                newsViewModel.refreshNews(reader.getFeeds())
             } else {
-                reader.refreshNewsFromFeed(selectedChannel!!.url, this)
+                newsViewModel.refreshNews(arrayOf(selectedChannel!!.url))
             }
             newsAdapter.notifyDataSetChanged()
         } else {

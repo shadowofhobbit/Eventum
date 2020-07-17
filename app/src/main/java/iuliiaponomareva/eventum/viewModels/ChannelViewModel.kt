@@ -1,4 +1,4 @@
-package iuliiaponomareva.eventum.activities
+package iuliiaponomareva.eventum.viewModels
 
 import androidx.lifecycle.*
 import iuliiaponomareva.eventum.ChannelRepository
@@ -63,10 +63,6 @@ class ChannelViewModel(private val repository: ChannelRepository) : ViewModel() 
         return url
     }
 
-}
-
-class ChannelViewModelFactory(private val channelRepository: ChannelRepository): ViewModelProvider.NewInstanceFactory() {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T = ChannelViewModel(channelRepository) as T
 }
 
 enum class ChannelError {

@@ -28,9 +28,6 @@
                 android:value="iuliiaponomareva.eventum.activities.MainActivity" />
         </activity>
 
-        <service
-            android:name=".async.NewsService"
-            android:exported="false"/>
     </application>
 
 </manifest>

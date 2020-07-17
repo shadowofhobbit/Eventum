@@ -1,4 +1,4 @@
-package iuliiaponomareva.eventum.activities
+package iuliiaponomareva.eventum.viewModels
 
 /**
  *  A wrapper for events in LiveData

@@ -155,8 +155,8 @@ class RSSAndAtomParser {
         return result
     }
 
-    fun parseNews(url: String): Set<News?> {
-        var result: Set<News?> = TreeSet(NewsComparator())
+    fun parseNews(url: String): Set<News> {
+        var result: Set<News> = TreeSet(NewsComparator())
         var stream: InputStream? = null
         val parser = Xml.newPullParser()
         try {

@@ -1,7 +1,5 @@
 package iuliiaponomareva.eventum.data
 
-import iuliiaponomareva.eventum.activities.MainActivity
-import iuliiaponomareva.eventum.async.NewsService
 import java.util.*
 
 class Reader {
@@ -27,14 +25,6 @@ class Reader {
 
     fun getFeeds(): Array<String> {
         return feeds.keys.toTypedArray()
-    }
-
-    fun refreshAllNews(activity: MainActivity) {
-        NewsService.startActionLoadNews(activity, getFeeds())
-    }
-
-    fun refreshNewsFromFeed(url: String, activity: MainActivity) {
-        NewsService.startActionLoadNews(activity, arrayOf(url))
     }
 
     fun finishRefreshing(res: Array<News>?, url: String) {
