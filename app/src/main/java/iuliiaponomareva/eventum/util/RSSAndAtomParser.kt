@@ -109,8 +109,7 @@ class RSSAndAtomParser {
         try {
             while (parser.next() != XmlPullParser.END_TAG) {
                 if (parser.eventType == XmlPullParser.START_TAG) {
-                    val name = parser.name
-                    when (name) {
+                    when (val name = parser.name) {
                         "title" -> title = readTag(parser, name)
                         "summary" -> description = readTag(parser, name)
                         "link" -> {
@@ -223,8 +222,7 @@ class RSSAndAtomParser {
         var pubDate: String? = null
         while (!(parser.next() == XmlPullParser.END_TAG && parser.name == "item")) {
             if (parser.eventType == XmlPullParser.START_TAG) {
-                val name = parser.name
-                when (name) {
+                when (val name = parser.name) {
                     "title" -> title = readTag(parser, name)
                     "description", "summary" -> description = readTag(parser, name)
                     "link" -> link = readTag(parser, name)
@@ -275,8 +273,7 @@ class RSSAndAtomParser {
         var pubDate: String? = null
         while (!(parser.next() == XmlPullParser.END_TAG && parser.name == "entry")) {
             if (parser.eventType == XmlPullParser.START_TAG) {
-                val name = parser.name
-                when (name) {
+                when (val name = parser.name) {
                     "title" -> title = readTag(parser, name)
                     "summary", "description" -> description = readTag(parser, name)
                     "link" -> {
@@ -325,12 +322,16 @@ class RSSAndAtomParser {
             //2002-10-02T15:00:00.05Z
             var pubDate: Date? = null
             val template: String = if (format == Format.RSS) {
-                if (Character.isDigit(dateToParse[dateToParse.length - 1])) {
-                    "EEE, dd MMM yyyy HH:mm:ss Z"
-                } else if (dateToParse.endsWith("Z")) {
-                    "EEE, dd MMM yyyy HH:mm:ss 'Z'"
-                } else {
-                    "EEE, dd MMM yyyy HH:mm:ss z"
+                when {
+                    Character.isDigit(dateToParse[dateToParse.length - 1]) -> {
+                        "EEE, dd MMM yyyy HH:mm:ss Z"
+                    }
+                    dateToParse.endsWith("Z") -> {
+                        "EEE, dd MMM yyyy HH:mm:ss 'Z'"
+                    }
+                    else -> {
+                        "EEE, dd MMM yyyy HH:mm:ss z"
+                    }
                 }
             } else {
                 if (dateToParse.endsWith("Z")) {
@@ -340,12 +341,16 @@ class RSSAndAtomParser {
                         "yyyy-MM-dd'T'HH:mm:ss'Z'"
                     }
                 } else {
-                    if (dateToParse.contains(".")) {
-                        "yyyy-MM-dd'T'HH:mm:ss.SZZZZZ"
-                    } else if (dateToParse.contains(" ")) {
-                        "yyyy-MM-dd HH:mm:ss" //2016-01-28 13:26:03
-                    } else {
-                        "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
+                    when {
+                        dateToParse.contains(".") -> {
+                            "yyyy-MM-dd'T'HH:mm:ss.SZZZZZ"
+                        }
+                        dateToParse.contains(" ") -> {
+                            "yyyy-MM-dd HH:mm:ss" //2016-01-28 13:26:03
+                        }
+                        else -> {
+                            "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
+                        }
                     }
                 }
             }

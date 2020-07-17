@@ -14,7 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.ArrayList
 
-class ChannelRepository(val context: Context) {
+class ChannelRepository(private val context: Context) {
     private val parser: RSSAndAtomParser by lazy {
         RSSAndAtomParser()
     }

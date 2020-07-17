@@ -39,7 +39,6 @@ class DbHelper(context: Context?) : SQLiteOpenHelper(
                 + Feeds.COLUMN_NAME_LINK + TEXT_TYPE + COMMA_SEP
                 + Feeds.COLUMN_NAME_DESCRIPTION + TEXT_TYPE
                 + " )")
-        private const val SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS " + Feeds.TABLE_NAME
         private const val DATABASE_VERSION = 1
         const val DATABASE_NAME = "FeedReader.db"
     }

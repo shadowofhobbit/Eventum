@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
         newsViewModel = ViewModelProvider(this)[NewsViewModel::class.java]
         newsViewModel.news.observe(this, androidx.lifecycle.Observer {newsMap ->
             for (url in newsMap.keys) {
-                reader.finishRefreshing(newsMap[url]!!.toTypedArray(), url)
+                reader.finishRefreshing(newsMap[url]?.toTypedArray(), url)
             }
             if (newsMap.size == 1) {
                 showNews(reader.getNewsFromFeed(newsMap.keys.first()))
