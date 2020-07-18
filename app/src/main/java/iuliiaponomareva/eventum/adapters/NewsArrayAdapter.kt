@@ -7,8 +7,6 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import android.os.Build
-import android.text.Html
 import android.text.Html.ImageGetter
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
@@ -16,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
+import androidx.core.text.HtmlCompat
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Picasso.LoadedFrom
 import com.squareup.picasso.Target
@@ -59,18 +58,11 @@ class NewsArrayAdapter(
             view = convertView
             holder = view.tag as ViewHolder
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            holder.textView.text = Html.fromHtml(
-                getItem(position).toString(),
-                Html.FROM_HTML_MODE_LEGACY,
-                MyImageGetter(this, holder.textView), null
-            )
-        } else {
-            holder.textView.text = Html.fromHtml(
-                getItem(position).toString(),
-                MyImageGetter(this, holder.textView), null
-            )
-        }
+        holder.textView.text = HtmlCompat.fromHtml(
+            getItem(position).toString(),
+            HtmlCompat.FROM_HTML_MODE_LEGACY,
+            MyImageGetter(this, holder.textView), null
+        )
         return view
     }
 
@@ -101,13 +93,13 @@ internal class MyImageGetter(
     private var source: String? = null
     private var image: MyDrawable? = null
     override fun getDrawable(source: String): Drawable {
-        var source = source
+        var drawableSource = source
         image = MyDrawable(newsArrayAdapter.context.resources)
-        if (source.startsWith("//")) {
-            source = "http:$source"
+        if (drawableSource.startsWith("//")) {
+            drawableSource = "http:$drawableSource"
         }
-        this.source = source
-        newsArrayAdapter.picasso.load(source).tag(newsArrayAdapter.channelURL ?: DEFAULT_TAG)
+        this.source = drawableSource
+        newsArrayAdapter.picasso.load(drawableSource).tag(newsArrayAdapter.channelURL ?: DEFAULT_TAG)
             .resize(width, 0)
             .onlyScaleDown()
             .into(this)
