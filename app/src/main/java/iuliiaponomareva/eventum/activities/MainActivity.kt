@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
@@ -111,7 +113,7 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
             drawerLayout.closeDrawer(drawer)
             newsAdapter.cancel()
             news.clear()
-            if (isConnectedToNetwork) {
+            if (isConnectedToNetwork()) {
                 if (selectedChannel == all) {
                     newsViewModel.refreshNews(reader.getFeeds())
                 } else {
@@ -222,7 +224,7 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
     }
 
     override fun addChosenFeed(feedUrl: String) {
-        if (isConnectedToNetwork) {
+        if (isConnectedToNetwork()) {
             channelsViewModel.addChannel(feedUrl)
         } else {
             createToast(R.string.no_internet)
@@ -252,13 +254,19 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
         channelsViewModel.deleteChannel(feed!!)
     }
 
-    private val isConnectedToNetwork: Boolean
-        get() {
-            val manager = applicationContext
-                .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    @Suppress("DEPRECATION")
+    private fun isConnectedToNetwork(): Boolean {
+        val manager = applicationContext
+            .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val network = manager.activeNetwork ?: return false
+            val networkCapabilities = manager.getNetworkCapabilities(network) ?: return false
+            return networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        } else {
             val networkInfo = manager.activeNetworkInfo
             return networkInfo != null && networkInfo.isConnected
         }
+    }
 
     override fun onRefresh() {
         refreshNews()
@@ -269,7 +277,7 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
         if (selectedChannel == null) {
             selectedChannel = all
         }
-        if (isConnectedToNetwork) {
+        if (isConnectedToNetwork()) {
             news.clear()
             if (selectedChannel == all) {
                 newsViewModel.refreshNews(reader.getFeeds())
