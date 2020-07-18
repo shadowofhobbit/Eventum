@@ -20,6 +20,7 @@ import com.squareup.picasso.Picasso
 import com.squareup.picasso.Picasso.LoadedFrom
 import com.squareup.picasso.Target
 import iuliiaponomareva.eventum.R
+import iuliiaponomareva.eventum.adapters.NewsArrayAdapter.Companion.DEFAULT_TAG
 import iuliiaponomareva.eventum.data.News
 
 class NewsArrayAdapter(
@@ -37,6 +38,7 @@ class NewsArrayAdapter(
 
     fun cancel() {
         channelURL?.let { picasso.cancelTag(it) }
+        picasso.cancelTag(DEFAULT_TAG)
     }
 
     override fun getView(
@@ -72,6 +74,10 @@ class NewsArrayAdapter(
         return view
     }
 
+    companion object {
+        const val DEFAULT_TAG = "all"
+    }
+
 }
 
 internal class MyDrawable(res: Resources) :
@@ -101,7 +107,7 @@ internal class MyImageGetter(
             source = "http:$source"
         }
         this.source = source
-        newsArrayAdapter.picasso.load(source).tag(newsArrayAdapter.channelURL!!)
+        newsArrayAdapter.picasso.load(source).tag(newsArrayAdapter.channelURL ?: DEFAULT_TAG)
             .resize(width, 0)
             .onlyScaleDown()
             .into(this)
