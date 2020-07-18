@@ -311,7 +311,7 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
         drawer.setSelection(position)
         drawer.setItemChecked(position, true)
         if (selectedChannel == null) {
-            setTitle(R.string.chosen_feed_default)
+            supportActionBar?.setTitle(R.string.chosen_feed_default)
         } else {
             title = selectedChannel!!.title
         }
