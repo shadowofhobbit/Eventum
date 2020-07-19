@@ -11,19 +11,23 @@ import android.util.Log
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.AbsListView
+import android.view.View
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener
 import iuliiaponomareva.eventum.ChannelRepository
 import iuliiaponomareva.eventum.R
-import iuliiaponomareva.eventum.adapters.NewsArrayAdapter
+import iuliiaponomareva.eventum.adapters.NewsAdapter
 import iuliiaponomareva.eventum.data.Channel
 import iuliiaponomareva.eventum.data.News
 import iuliiaponomareva.eventum.data.Reader
@@ -42,13 +46,14 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
     RemoveFeedDialogListener, OnRefreshListener {
     private lateinit var reader: Reader
     private lateinit var drawerAdapter: ArrayAdapter<Channel>
-    private lateinit var news: MutableList<News>
-    private lateinit var newsAdapter: NewsArrayAdapter
+    private lateinit var newsAdapter: NewsAdapter
+    private lateinit var adapterDataObserver: AdapterDataObserver
     private lateinit var drawerToggle: ActionBarDrawerToggle
     private var selectedChannel: Channel? = null
     private lateinit var all: Channel
     private lateinit var channelsViewModel: ChannelViewModel
     private lateinit var newsViewModel: NewsViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -112,7 +117,6 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
             val selectedFeed = selectedChannel!!.url
             drawerLayout.closeDrawer(drawer)
             newsAdapter.cancel()
-            news.clear()
             if (isConnectedToNetwork()) {
                 if (selectedChannel == all) {
                     newsViewModel.refreshNews(reader.getFeeds())
@@ -121,9 +125,9 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
                 }
             } else {
                 if (selectedChannel == all) {
-                    news.addAll(reader.allNews)
+                    newsAdapter.news = reader.allNews.toList()
                 } else {
-                    news.addAll(reader.getNewsFromFeed(selectedFeed))
+                   newsAdapter.news = reader.getNewsFromFeed(selectedFeed).toList()
                 }
                 createToast(R.string.no_internet)
             }
@@ -132,34 +136,28 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
     }
 
     private fun setUpNewsView() {
-        newsListView.onItemClickListener = OnItemClickListener { parent, _, position, _ ->
-            val selectedNews = parent.getItemAtPosition(position) as News
+        refreshLayout.setOnRefreshListener(this)
+        newsAdapter = NewsAdapter {
             val intent = Intent(this@MainActivity, ViewPageActivity::class.java)
-            intent.putExtra(NEWS_LINK, selectedNews.link)
+           intent.putExtra(NEWS_LINK, it.link)
             startActivity(intent)
         }
-        news = ArrayList()
-        newsAdapter = NewsArrayAdapter(this@MainActivity, news)
-        newsListView.adapter = newsAdapter
-        newsListView.emptyView = emptyView
-        refreshLayout.setOnRefreshListener(this)
-        newsListView.setOnScrollListener(object : AbsListView.OnScrollListener {
-            override fun onScrollStateChanged(
-                view: AbsListView,
-                scrollState: Int
-            ) {
+        newsRecyclerView.adapter = newsAdapter
+        val dividerItemDecoration = DividerItemDecoration(this, LinearLayoutManager.VERTICAL)
+        val drawable = ContextCompat.getDrawable(this, R.drawable.divider)
+        drawable?.let { dividerItemDecoration.setDrawable(it) }
+        newsRecyclerView.addItemDecoration(dividerItemDecoration)
+        newsRecyclerView.setHasFixedSize(true)
+        adapterDataObserver = object: AdapterDataObserver() {
+            override fun onChanged() {
+                super.onChanged()
+                if (newsAdapter.itemCount == 0) {
+                    emptyView.visibility = View.VISIBLE
+                } else {
+                    emptyView.visibility = View.INVISIBLE
+                }
             }
-
-            override fun onScroll(
-                view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int,
-                totalItemCount: Int
-            ) {
-                val topRowVerticalPosition = if (newsListView == null
-                    || newsListView?.childCount == 0
-                ) 0 else newsListView!!.getChildAt(0).top
-                refreshLayout.isEnabled = firstVisibleItem == 0 && topRowVerticalPosition >= 0
-            }
-        })
+        }
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
@@ -209,8 +207,14 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
         )
     }
 
+    override fun onStart() {
+        super.onStart()
+        newsAdapter.registerAdapterDataObserver(adapterDataObserver)
+    }
+
     override fun onStop() {
         super.onStop()
+        newsAdapter.unregisterAdapterDataObserver(adapterDataObserver)
         saveSelectedChannel()
     }
 
@@ -278,22 +282,21 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
             selectedChannel = all
         }
         if (isConnectedToNetwork()) {
-            news.clear()
+           // news.clear()
             if (selectedChannel == all) {
                 newsViewModel.refreshNews(reader.getFeeds())
             } else {
                 newsViewModel.refreshNews(arrayOf(selectedChannel!!.url))
             }
-            newsAdapter.notifyDataSetChanged()
+           // newsAdapter.notifyDataSetChanged()
         } else {
             createToast(R.string.no_internet)
         }
     }
 
     private fun showNews(newsSet: Set<News>) {
-        newsAdapter.addAll(newsSet)
         newsAdapter.channelURL = selectedChannel?.url
-        newsAdapter.notifyDataSetChanged()
+        newsAdapter.news = newsSet.toList()
         title = selectedChannel?.title
     }
 

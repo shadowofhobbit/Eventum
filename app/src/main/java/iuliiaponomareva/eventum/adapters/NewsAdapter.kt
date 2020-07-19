@@ -1,38 +1,56 @@
 package iuliiaponomareva.eventum.adapters
 
 import android.app.Activity
-import android.content.Context
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import android.text.Html.ImageGetter
+import android.text.Html
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
+import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
-import com.squareup.picasso.Picasso.LoadedFrom
 import com.squareup.picasso.Target
 import iuliiaponomareva.eventum.R
-import iuliiaponomareva.eventum.adapters.NewsArrayAdapter.Companion.DEFAULT_TAG
+import iuliiaponomareva.eventum.adapters.NewsAdapter.Companion.DEFAULT_TAG
 import iuliiaponomareva.eventum.data.News
+import iuliiaponomareva.eventum.data.NewsComparator
+import kotlinx.android.synthetic.main.news_list_item.view.*
 
-class NewsArrayAdapter(
-    aContext: Context,
-    news: List<News>
-) : ArrayAdapter<News>(aContext, R.layout.news_list_item, news) {
-
+class NewsAdapter(private val newsListener: (News) -> Unit) : RecyclerView.Adapter<NewsViewHolder>() {
     val picasso: Picasso = Picasso.get()
-
     var channelURL: String? = null
+    private var _allNews = listOf<News>()
+    var news: List<News>
+        get() = _allNews
+        set(value) {
+            _allNews = value.sortedWith(kotlin.Comparator(NewsComparator()::compare))
+            notifyDataSetChanged()
+        }
 
-    private class ViewHolder {
-        lateinit var textView: TextView
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NewsViewHolder {
+        val layoutInflater = LayoutInflater.from(parent.context)
+        val view = layoutInflater.inflate(R.layout.news_list_item, parent, false)
+        val newsViewHolder = NewsViewHolder(view)
+        newsViewHolder.itemView.setOnClickListener {
+            newsListener(_allNews[newsViewHolder.adapterPosition])
+        }
+        return newsViewHolder
+    }
+
+    override fun getItemCount(): Int = _allNews.size
+
+    override fun onBindViewHolder(holder: NewsViewHolder, position: Int) {
+        holder.itemView.newsTextView.text = HtmlCompat.fromHtml(
+            _allNews.elementAt(position).toString(),
+            HtmlCompat.FROM_HTML_MODE_LEGACY,
+            NewsImageGetter(this, holder.itemView.newsTextView), null
+        )
     }
 
     fun cancel() {
@@ -40,39 +58,14 @@ class NewsArrayAdapter(
         picasso.cancelTag(DEFAULT_TAG)
     }
 
-    override fun getView(
-        position: Int,
-        convertView: View?,
-        parent: ViewGroup
-    ): View {
-        val view: View
-        val holder: ViewHolder
-        if (convertView == null) {
-            val inflater = context
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-            view = inflater.inflate(R.layout.news_list_item, parent, false)
-            holder = ViewHolder()
-            holder.textView = view.findViewById(R.id.news_textview)
-            view.tag = holder
-        } else {
-            view = convertView
-            holder = view.tag as ViewHolder
-        }
-        holder.textView.text = HtmlCompat.fromHtml(
-            getItem(position).toString(),
-            HtmlCompat.FROM_HTML_MODE_LEGACY,
-            MyImageGetter(this, holder.textView), null
-        )
-        return view
-    }
-
     companion object {
         const val DEFAULT_TAG = "all"
     }
-
 }
 
-internal class MyDrawable(res: Resources) :
+class NewsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+
+internal class NewsDrawable(res: Resources) :
     BitmapDrawable(res, null as Bitmap?) {
     fun setDrawable(drawable: Drawable?) {
         this.drawable = drawable
@@ -84,17 +77,18 @@ internal class MyDrawable(res: Resources) :
     }
 }
 
-internal class MyImageGetter(
-    private val newsArrayAdapter: NewsArrayAdapter,
-    private val view: TextView?
+internal class NewsImageGetter(
+    private val newsArrayAdapter: NewsAdapter,
+    private val view: TextView
 ) :
-    ImageGetter, Target {
+    Html.ImageGetter, Target {
     private val width: Int
     private var source: String? = null
-    private var image: MyDrawable? = null
+    private var image: NewsDrawable? = null
+
     override fun getDrawable(source: String): Drawable {
         var drawableSource = source
-        image = MyDrawable(newsArrayAdapter.context.resources)
+        image = NewsDrawable(view.context.resources)
         if (drawableSource.startsWith("//")) {
             drawableSource = "http:$drawableSource"
         }
@@ -106,16 +100,16 @@ internal class MyImageGetter(
         return image!!
     }
 
-    override fun onBitmapLoaded(bitmap: Bitmap, from: LoadedFrom) {
+    override fun onBitmapLoaded(bitmap: Bitmap, from: Picasso.LoadedFrom) {
         if (source != null && bitmap != null) {
             val image: Drawable = BitmapDrawable(
-                newsArrayAdapter.context.resources,
+                view.context.resources,
                 bitmap
             )
             image.setBounds(0, 0, image.intrinsicWidth, image.intrinsicHeight)
             this.image!!.setBounds(0, 0, image.intrinsicWidth, image.intrinsicHeight)
             this.image!!.setDrawable(image)
-            view!!.invalidate()
+            view.invalidate()
             view.text = view.text
         }
     }
@@ -130,7 +124,7 @@ internal class MyImageGetter(
 
     init {
         val metrics = DisplayMetrics()
-        (newsArrayAdapter.context as Activity).windowManager.defaultDisplay
+        (view.context as Activity).windowManager.defaultDisplay
             .getMetrics(metrics)
         width = metrics.widthPixels
     }
