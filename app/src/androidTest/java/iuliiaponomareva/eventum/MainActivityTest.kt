@@ -33,7 +33,7 @@ class MainActivityTest {
         Espresso.onView(ViewMatchers.withId(R.id.emptyView)).check(
             ViewAssertions.matches(ViewMatchers.withText(R.string.no_feeds_added_yet))
         )
-        Espresso.onView(ViewMatchers.withId(R.id.newsListView))
+        Espresso.onView(ViewMatchers.withId(R.id.newsRecyclerView))
             .check(ViewAssertions.matches(IsNot.not(ViewMatchers.isDisplayed())))
     }
 

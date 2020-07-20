@@ -7,6 +7,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Bundle
+import android.text.TextUtils
 import android.util.Log
 import android.view.Gravity
 import android.view.Menu
@@ -137,10 +138,12 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
 
     private fun setUpNewsView() {
         refreshLayout.setOnRefreshListener(this)
-        newsAdapter = NewsAdapter {
-            val intent = Intent(this@MainActivity, ViewPageActivity::class.java)
-           intent.putExtra(NEWS_LINK, it.link)
-            startActivity(intent)
+        newsAdapter = NewsAdapter { news ->
+            if (!TextUtils.isEmpty(news.link)) {
+                val intent = Intent(this@MainActivity, ViewPageActivity::class.java)
+                intent.putExtra(NEWS_LINK, news.link)
+                startActivity(intent)
+            }
         }
         newsRecyclerView.adapter = newsAdapter
         val dividerItemDecoration = DividerItemDecoration(this, LinearLayoutManager.VERTICAL)
@@ -199,7 +202,9 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
     private fun removeFeed() {
         val newFragment: DialogFragment = RemoveFeedDialogFragment()
         val args = Bundle()
-        args.putStringArray(RemoveFeedDialogFragment.FEEDS, reader.getFeeds())
+        val channels = ArrayList<Channel>()
+        channels.addAll(reader.getFeedsCollection())
+        args.putParcelableArrayList(RemoveFeedDialogFragment.FEEDS, channels)
         newFragment.arguments = args
         newFragment.show(
             supportFragmentManager,
@@ -247,15 +252,14 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
         toast.show()
     }
 
-    override fun removeChosenFeed(url: String) {
-        if (selectedChannel?.url == url) {
+    override fun removeChosenFeed(channel: Channel) {
+        if (selectedChannel == channel) {
             selectedChannel = all
         }
-        val feed = reader.getFeed(url)
-        drawerAdapter.remove(feed)
-        reader.removeFeed(url)
+        reader.removeFeed(channel.url)
+        drawerAdapter.remove(channel)
         drawerAdapter.notifyDataSetChanged()
-        channelsViewModel.deleteChannel(feed!!)
+        channelsViewModel.deleteChannel(channel)
     }
 
     @Suppress("DEPRECATION")
@@ -282,13 +286,12 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
             selectedChannel = all
         }
         if (isConnectedToNetwork()) {
-           // news.clear()
+            newsAdapter.news = listOf()
             if (selectedChannel == all) {
                 newsViewModel.refreshNews(reader.getFeeds())
             } else {
                 newsViewModel.refreshNews(arrayOf(selectedChannel!!.url))
             }
-           // newsAdapter.notifyDataSetChanged()
         } else {
             createToast(R.string.no_internet)
         }

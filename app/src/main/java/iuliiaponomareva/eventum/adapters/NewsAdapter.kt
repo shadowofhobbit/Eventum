@@ -65,19 +65,19 @@ class NewsAdapter(private val newsListener: (News) -> Unit) : RecyclerView.Adapt
 
 class NewsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
-internal class NewsDrawable(res: Resources) :
-    BitmapDrawable(res, null as Bitmap?) {
+private class NewsDrawable(res: Resources) : BitmapDrawable(res, null as Bitmap?) {
     fun setDrawable(drawable: Drawable?) {
         this.drawable = drawable
     }
 
     private var drawable: Drawable? = null
+
     override fun draw(canvas: Canvas) {
         drawable?.draw(canvas)
     }
 }
 
-internal class NewsImageGetter(
+private class NewsImageGetter(
     private val newsArrayAdapter: NewsAdapter,
     private val view: TextView
 ) :

@@ -14,15 +14,12 @@ object HTMLFormatter {
         newsBuilder.append("<b>")
         newsBuilder.append(news.title)
         newsBuilder.append("</b>")
-        if (news.getPubDate() != null) {
+        if (news.pubDate != null) {
             addNewLine(newsBuilder)
-            newsBuilder.append(DateFormat.getDateTimeInstance().format(news.getPubDate()!!))
+            newsBuilder.append(DateFormat.getDateTimeInstance().format(news.pubDate))
         }
         addNewLine(newsBuilder)
-        val description = news.description
-        if (description != null) {
-            newsBuilder.append(description)
-        }
+        newsBuilder.append(news.description)
         return newsBuilder.toString()
     }
 }

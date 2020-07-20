@@ -22,7 +22,7 @@ class ChannelViewModel(private val repository: ChannelRepository) : ViewModel() 
 
     fun addChannel(url: String) {
         val checkedUrl = checkURL(url)
-        if (channels.value?.getEventIfNotHandled()?.map {it.url } ?.contains(checkedUrl) == true) {
+        if (channels.value?.getEvent()?.map {it.url } ?.contains(checkedUrl) == true) {
             val alreadyExists = ChannelError.ALREADY_EXISTS
             alreadyExists.url = checkedUrl
             _error.postValue(Event(alreadyExists))

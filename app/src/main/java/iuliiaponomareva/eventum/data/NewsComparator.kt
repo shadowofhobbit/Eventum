@@ -9,7 +9,7 @@ import java.util.*
 class NewsComparator : Comparator<News>, Serializable {
     override fun compare(news1: News, news2: News): Int {
         return if (news1.pubDate != null && news2.pubDate != null) {
-            news2.pubDate!!.compareTo(news1.pubDate)
+            news2.pubDate.compareTo(news1.pubDate)
         } else {
             Int.MAX_VALUE
         }

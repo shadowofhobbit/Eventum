@@ -9,11 +9,12 @@ import android.widget.AbsListView
 import android.widget.ArrayAdapter
 import androidx.fragment.app.DialogFragment
 import iuliiaponomareva.eventum.R
+import iuliiaponomareva.eventum.data.Channel
 import kotlinx.android.synthetic.main.remove_feed.view.*
 
 class RemoveFeedDialogFragment : DialogFragment() {
     interface RemoveFeedDialogListener {
-        fun removeChosenFeed(feed: String)
+        fun removeChosenFeed(feed: Channel)
     }
 
     private var listener: RemoveFeedDialogListener? = null
@@ -37,7 +38,7 @@ class RemoveFeedDialogFragment : DialogFragment() {
         val dialogView = inflater.inflate(R.layout.remove_feed, null)
         builder.setTitle(R.string.remove_feed)
             .setView(dialogView)
-        val feeds = arguments?.getStringArray(FEEDS) ?: arrayOfNulls(0)
+        val feeds = arguments?.getParcelableArrayList<Channel>(FEEDS) ?: arrayListOf()
         val adapter = ArrayAdapter(
             activity!!,
             R.layout.news_list_item, feeds

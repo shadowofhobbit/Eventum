@@ -89,7 +89,7 @@ class RSSAndAtomParser {
                     }
                 }
             }
-            channel = Channel(url, title ?: url, link, description)
+            channel = Channel(url, title ?: url, link ?: "", description ?: "")
         } catch (e: IOException) {
             e.printStackTrace()
         } catch (e: XmlPullParserException) {
@@ -125,7 +125,7 @@ class RSSAndAtomParser {
                     }
                 }
             }
-            channel = Channel(url, title ?: url, link, description)
+            channel = Channel(url, title ?: url, link ?: "", description ?: "")
         } catch (e: IOException) {
             e.printStackTrace()
         } catch (e: XmlPullParserException) {
@@ -232,14 +232,12 @@ class RSSAndAtomParser {
                 }
             }
         }
-        val news = News(title, link, description)
-        if (pubDate != null) {
-            news.setPubDate(
-                parseDate(
-                    pubDate,
-                    Format.RSS
-                )!!
-            )
+        val news: News
+        news = if (pubDate != null) {
+            val parsedDate = parseDate(pubDate, Format.RSS)
+            News(title, link, description, parsedDate)
+        } else {
+            News(title, link, description)
         }
         return news
     }
@@ -290,14 +288,12 @@ class RSSAndAtomParser {
                 }
             }
         }
-        val news = News(title, link, description)
-        if (pubDate != null) {
-            news.setPubDate(
-                parseDate(
-                    pubDate,
-                    Format.ATOM
-                )!!
-            )
+        val news: News
+        news = if (pubDate != null) {
+            val parsedDate = parseDate(pubDate, Format.ATOM)
+            News(title, link, description, parsedDate)
+        } else {
+            News(title, link, description)
         }
         return news
     }

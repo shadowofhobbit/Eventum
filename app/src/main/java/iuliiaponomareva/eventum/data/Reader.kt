@@ -25,6 +25,10 @@ class Reader {
         return feeds.keys.toTypedArray()
     }
 
+    fun getFeedsCollection(): Collection<Channel> {
+        return feeds.values
+    }
+
     fun finishRefreshing(res: Array<News>?, url: String) {
         if (res != null) {
             Collections.addAll(_allNews, *res)
