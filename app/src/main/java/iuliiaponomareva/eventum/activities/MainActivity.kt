@@ -32,6 +32,7 @@ import iuliiaponomareva.eventum.adapters.NewsAdapter
 import iuliiaponomareva.eventum.data.Channel
 import iuliiaponomareva.eventum.data.News
 import iuliiaponomareva.eventum.data.Reader
+import iuliiaponomareva.eventum.data.ReaderDatabase
 import iuliiaponomareva.eventum.fragments.AddFeedDialogFragment
 import iuliiaponomareva.eventum.fragments.AddFeedDialogFragment.AddFeedDialogListener
 import iuliiaponomareva.eventum.fragments.RemoveFeedDialogFragment
@@ -68,7 +69,8 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
         )
         setUpChannelsView()
         setUpNewsView()
-        val repository = ChannelRepository(applicationContext)
+        val channelDao = ReaderDatabase.getDatabase(applicationContext).channelDao()
+        val repository = ChannelRepository(channelDao)
         channelsViewModel = ViewModelProvider(this,
             ChannelViewModelFactory(
                 repository

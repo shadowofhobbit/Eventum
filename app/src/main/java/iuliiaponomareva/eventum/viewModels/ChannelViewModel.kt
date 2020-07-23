@@ -1,6 +1,9 @@
 package iuliiaponomareva.eventum.viewModels
 
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import iuliiaponomareva.eventum.ChannelRepository
 import iuliiaponomareva.eventum.data.Channel
 import kotlinx.coroutines.launch
@@ -40,7 +43,7 @@ class ChannelViewModel(private val repository: ChannelRepository) : ViewModel() 
 
     fun deleteChannel(channel: Channel) {
         viewModelScope.launch {
-            repository.delete(channel.url)
+            repository.delete(channel)
             loadChannels()
         }
     }

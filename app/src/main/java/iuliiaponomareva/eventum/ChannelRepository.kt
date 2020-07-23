@@ -1,84 +1,18 @@
 package iuliiaponomareva.eventum
 
-import android.content.ContentValues
-import android.content.Context
-import android.database.Cursor
-import android.database.sqlite.SQLiteDatabase
-import android.util.Log
-import androidx.core.database.sqlite.transaction
 import iuliiaponomareva.eventum.data.Channel
-import iuliiaponomareva.eventum.data.DbHelper
-import iuliiaponomareva.eventum.data.FeedReaderContract
+import iuliiaponomareva.eventum.data.ChannelDao
 import iuliiaponomareva.eventum.util.RSSAndAtomParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.ArrayList
 
-class ChannelRepository(private val context: Context) {
+class ChannelRepository(private val channelDao: ChannelDao) {
     private val parser: RSSAndAtomParser by lazy {
         RSSAndAtomParser()
     }
 
     suspend fun load(): List<Channel> {
-        return withContext(Dispatchers.IO) {
-            var dbHelper: DbHelper? = null
-            var db: SQLiteDatabase? = null
-            var cursor: Cursor? = null
-            val feeds: MutableList<Channel> =
-                ArrayList()
-            try {
-                dbHelper = DbHelper(context)
-                db = dbHelper.readableDatabase
-                val columns = arrayOf(
-                    FeedReaderContract.Feeds.COLUMN_NAME_FEED_URL,
-                    FeedReaderContract.Feeds.COLUMN_NAME_TITLE,
-                    FeedReaderContract.Feeds.COLUMN_NAME_LINK,
-                    FeedReaderContract.Feeds.COLUMN_NAME_DESCRIPTION
-                )
-                cursor = db.query(
-                    FeedReaderContract.Feeds.TABLE_NAME,
-                    columns,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null
-                )
-                cursor.moveToFirst()
-                while (!cursor.isAfterLast) {
-                    val url = cursor.getString(
-                        cursor.getColumnIndexOrThrow(
-                            FeedReaderContract.Feeds.COLUMN_NAME_FEED_URL
-                        )
-                    )
-                    val title = cursor.getString(
-                        cursor.getColumnIndexOrThrow(
-                            FeedReaderContract.Feeds.COLUMN_NAME_TITLE
-                        )
-                    )
-                    val link = cursor.getString(
-                        cursor.getColumnIndexOrThrow(
-                            FeedReaderContract.Feeds.COLUMN_NAME_LINK
-                        )
-                    )
-                    val description = cursor.getString(
-                        cursor.getColumnIndexOrThrow(
-                            FeedReaderContract.Feeds.COLUMN_NAME_DESCRIPTION
-                        )
-                    )
-                    val channel =
-                        Channel(url, title, link, description)
-                    feeds.add(channel)
-                    cursor.moveToNext()
-                }
-            } finally {
-                cursor?.close()
-                db?.close()
-                dbHelper?.close()
-            }
-            Log.wtf("eventum", "${Thread.currentThread().id} ${Thread.currentThread().name} should not be main")
-            feeds
-        }
+        return channelDao.loadAllChannels()
     }
 
 
@@ -86,48 +20,13 @@ class ChannelRepository(private val context: Context) {
         return withContext(Dispatchers.IO) {
             val channel = parser.parseChannelInfo(url)
             channel?.let {
-                var dbHelper: DbHelper? = null
-                var db: SQLiteDatabase? = null
-                try {
-                    dbHelper = DbHelper(context)
-                    db = dbHelper.writableDatabase
-                    db.transaction {
-                        val values = ContentValues()
-                        values.put(FeedReaderContract.Feeds.COLUMN_NAME_FEED_URL, channel.url)
-                        values.put(FeedReaderContract.Feeds.COLUMN_NAME_TITLE, channel.title)
-                        values.put(FeedReaderContract.Feeds.COLUMN_NAME_LINK, channel.link)
-                        values.put(
-                            FeedReaderContract.Feeds.COLUMN_NAME_DESCRIPTION,
-                            channel.description
-                        )
-                        db.insert(FeedReaderContract.Feeds.TABLE_NAME, null, values)
-                    }
-                } finally {
-                    db?.close()
-                    dbHelper?.close()
-                }
+                channelDao.insertChannel(channel)
             }
             channel
         }
     }
 
-    suspend fun delete(url: String) {
-        withContext(Dispatchers.IO) {
-            var dbHelper: DbHelper? = null
-            var db: SQLiteDatabase? = null
-            try {
-                dbHelper = DbHelper(context)
-                db = dbHelper.writableDatabase
-                db.transaction {
-                    db.delete(
-                        FeedReaderContract.Feeds.TABLE_NAME,
-                        "${FeedReaderContract.Feeds.COLUMN_NAME_FEED_URL}= ?", arrayOf(url)
-                    )
-                }
-            } finally {
-                db?.close()
-                dbHelper?.close()
-            }
-        }
+    suspend fun delete(channel: Channel) {
+        channelDao.deleteChannel(channel)
     }
 }
