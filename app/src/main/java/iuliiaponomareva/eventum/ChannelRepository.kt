@@ -1,5 +1,6 @@
 package iuliiaponomareva.eventum
 
+import androidx.lifecycle.LiveData
 import iuliiaponomareva.eventum.data.Channel
 import iuliiaponomareva.eventum.data.ChannelDao
 import iuliiaponomareva.eventum.util.RSSAndAtomParser
@@ -11,9 +12,7 @@ class ChannelRepository(private val channelDao: ChannelDao) {
         RSSAndAtomParser()
     }
 
-    suspend fun load(): List<Channel> {
-        return channelDao.loadAllChannels()
-    }
+    fun load(): LiveData<List<Channel>> = channelDao.loadAllChannels()
 
 
     suspend fun add(url: String): Channel? {
@@ -26,7 +25,5 @@ class ChannelRepository(private val channelDao: ChannelDao) {
         }
     }
 
-    suspend fun delete(channel: Channel) {
-        channelDao.deleteChannel(channel)
-    }
+    suspend fun delete(channel: Channel) = channelDao.deleteChannel(channel)
 }

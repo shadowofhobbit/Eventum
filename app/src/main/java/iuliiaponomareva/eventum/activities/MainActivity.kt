@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
             .get(ChannelViewModel::class.java)
         newsViewModel = ViewModelProvider(this)[NewsViewModel::class.java]
         reader = newsViewModel.reader
-        channelsViewModel.getChannels().observe(this, androidx.lifecycle.Observer { event ->
+        channelsViewModel.channels.observe(this, androidx.lifecycle.Observer { event ->
             Log.wtf("eventum", "channels changed")
             val handled = event.handled
             onChannelsLoaded(event.getEvent(), refreshNews = !handled)

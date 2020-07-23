@@ -1,27 +1,17 @@
 package iuliiaponomareva.eventum.viewModels
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import iuliiaponomareva.eventum.ChannelRepository
 import iuliiaponomareva.eventum.data.Channel
 import kotlinx.coroutines.launch
 
 class ChannelViewModel(private val repository: ChannelRepository) : ViewModel() {
-    private val channels: MutableLiveData<Event<List<Channel>>> by lazy {
-        MutableLiveData<Event<List<Channel>>>().also {
-            launchLoadingChannels()
-        }
-    }
+    val channels: LiveData<Event<List<Channel>>> = repository.load()
+        .map { channels -> Event(channels) }
 
     private val _error = MutableLiveData<Event<ChannelError>>()
     val error: LiveData<Event<ChannelError>>
         get() = _error
-
-    fun getChannels(): LiveData<Event<List<Channel>>> {
-        return channels
-    }
 
     fun addChannel(url: String) {
         val checkedUrl = checkURL(url)
@@ -34,8 +24,6 @@ class ChannelViewModel(private val repository: ChannelRepository) : ViewModel() 
                 val channel = repository.add(checkedUrl)
                 if (channel == null) {
                     _error.postValue(Event(ChannelError.ERROR_ADDING))
-                } else {
-                    loadChannels()
                 }
             }
         }
@@ -44,19 +32,7 @@ class ChannelViewModel(private val repository: ChannelRepository) : ViewModel() 
     fun deleteChannel(channel: Channel) {
         viewModelScope.launch {
             repository.delete(channel)
-            loadChannels()
         }
-    }
-
-    private fun launchLoadingChannels() {
-        viewModelScope.launch {
-            loadChannels()
-        }
-    }
-
-    private suspend fun loadChannels() {
-        val loadedChannels = repository.load()
-        channels.postValue(Event(loadedChannels))
     }
 
     private fun checkURL(url: String): String {
