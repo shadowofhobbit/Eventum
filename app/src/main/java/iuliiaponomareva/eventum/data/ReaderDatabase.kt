@@ -1,6 +1,7 @@
 package iuliiaponomareva.eventum.data
 
 import android.content.Context
+import androidx.annotation.VisibleForTesting
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -19,10 +20,23 @@ abstract class ReaderDatabase : RoomDatabase() {
         private var INSTANCE: ReaderDatabase? = null
 
         //In version 1 columns were nullable
-        private var MIGRATION_1_2: Migration = object : Migration(1, 2) {
+        @VisibleForTesting
+        var MIGRATION_1_2: Migration = object : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.transaction {
                     database.execSQL("ALTER TABLE feeds RENAME TO old_feeds")
+                    database.execSQL(
+                        "UPDATE old_feeds SET feed_url = '' WHERE feed_url ISNULL"
+                    )
+                    database.execSQL(
+                        "UPDATE old_feeds SET title = '' WHERE title ISNULL"
+                    )
+                    database.execSQL(
+                        "UPDATE old_feeds SET link = '' WHERE link ISNULL"
+                    )
+                    database.execSQL(
+                        "UPDATE old_feeds SET description = '' WHERE description ISNULL"
+                    )
                     database.execSQL(
                         "CREATE TABLE feeds (feed_url TEXT NOT NULL PRIMARY KEY, " +
                                 "title TEXT NOT NULL DEFAULT ''," +
