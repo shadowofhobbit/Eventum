@@ -49,6 +49,8 @@ abstract class ReaderDatabase : RoomDatabase() {
             }
         }
 
+        const val DATABASE_NAME = "FeedReader.db"
+
         fun getDatabase(context: Context): ReaderDatabase {
             val tempInstance = INSTANCE
             if (tempInstance != null) {
@@ -58,7 +60,7 @@ abstract class ReaderDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     ReaderDatabase::class.java,
-                    "FeedReader.db"
+                    DATABASE_NAME
                 )
                     .addMigrations(MIGRATION_1_2)
                     .build()

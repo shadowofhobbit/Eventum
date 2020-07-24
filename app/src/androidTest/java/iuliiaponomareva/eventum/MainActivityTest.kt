@@ -8,7 +8,7 @@ import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.ActivityTestRule
 import iuliiaponomareva.eventum.activities.MainActivity
-import iuliiaponomareva.eventum.data.DbHelper
+import iuliiaponomareva.eventum.data.ReaderDatabase
 import org.hamcrest.core.IsNot
 import org.junit.Before
 import org.junit.Rule
@@ -18,7 +18,7 @@ class MainActivityTest {
     @Before
     fun deleteDB() {
         InstrumentationRegistry.getInstrumentation().targetContext
-            .deleteDatabase(DbHelper.DATABASE_NAME)
+            .deleteDatabase(ReaderDatabase.DATABASE_NAME)
     }
 
     @get:Rule
