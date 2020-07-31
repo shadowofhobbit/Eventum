@@ -1,28 +1,27 @@
 package iuliiaponomareva.eventum.viewModels
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import android.app.Application
+import androidx.lifecycle.*
 import iuliiaponomareva.eventum.NewsRepository
 import iuliiaponomareva.eventum.data.News
-import iuliiaponomareva.eventum.data.Reader
+import iuliiaponomareva.eventum.data.ReaderDatabase
 import kotlinx.coroutines.launch
 
-class NewsViewModel : ViewModel() {
-    private val newsRepository = NewsRepository()
-    private val _news: MutableLiveData<Map<String, Set<News>>> = MutableLiveData()
-    val reader: Reader = Reader()
+class NewsViewModel(application: Application) : AndroidViewModel(application) {
+    private val repository: NewsRepository
+    private val allNews: LiveData<List<News>>
+    val n: LiveData<Map<String, List<News>>>
 
-    val news: LiveData<Map<String, Set<News>>>
-        get() {
-            return _news
-        }
+    init {
+        val newsDao = ReaderDatabase.getDatabase(application).newsDao()
+        repository = NewsRepository(newsDao)
+        allNews = repository.loadAll()
+        n = allNews.map { x -> x.groupBy { it.channelUrl } }
+    }
 
     fun refreshNews(urls: Array<String>) {
         viewModelScope.launch {
-            val downloadedNews = newsRepository.refreshNews(urls)
-            _news.postValue(downloadedNews)
+           repository.refreshNews(urls)
         }
     }
 }

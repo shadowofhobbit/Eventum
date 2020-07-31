@@ -25,5 +25,7 @@ class ChannelRepository(private val channelDao: ChannelDao) {
         }
     }
 
-    suspend fun delete(channel: Channel) = channelDao.deleteChannel(channel)
+    suspend fun delete(channel: Channel) {
+        channelDao.deleteChannel(channel)
+    }
 }

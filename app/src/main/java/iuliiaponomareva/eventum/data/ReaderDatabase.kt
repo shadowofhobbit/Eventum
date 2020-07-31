@@ -5,15 +5,19 @@ import androidx.annotation.VisibleForTesting
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.transaction
 
 
-@Database(entities = [Channel::class], version = 2)
+@Database(entities = [Channel::class, News::class], version = 2)
+@TypeConverters(Converters::class)
 abstract class ReaderDatabase : RoomDatabase() {
 
     abstract fun channelDao(): ChannelDao
+
+    abstract fun newsDao(): NewsDao
 
     companion object {
         @Volatile
@@ -45,6 +49,10 @@ abstract class ReaderDatabase : RoomDatabase() {
                     )
                     database.execSQL("INSERT INTO feeds SELECT * FROM old_feeds")
                     database.execSQL("DROP TABLE old_feeds")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS news (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                            "title TEXT NOT NULL, link TEXT, description TEXT NOT NULL, pubDate INTEGER, channelUrl TEXT NOT NULL, " +
+                            "FOREIGN KEY(`channelUrl`) REFERENCES `feeds`(`feed_url`) ON UPDATE NO ACTION ON DELETE CASCADE)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `news_channelUrl` ON news (channelUrl)")
                 }
             }
         }

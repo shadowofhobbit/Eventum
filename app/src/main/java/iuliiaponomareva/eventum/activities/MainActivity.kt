@@ -8,7 +8,6 @@ import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
-import android.util.Log
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
@@ -31,7 +30,6 @@ import iuliiaponomareva.eventum.R
 import iuliiaponomareva.eventum.adapters.NewsAdapter
 import iuliiaponomareva.eventum.data.Channel
 import iuliiaponomareva.eventum.data.News
-import iuliiaponomareva.eventum.data.Reader
 import iuliiaponomareva.eventum.data.ReaderDatabase
 import iuliiaponomareva.eventum.fragments.AddFeedDialogFragment
 import iuliiaponomareva.eventum.fragments.AddFeedDialogFragment.AddFeedDialogListener
@@ -46,12 +44,11 @@ import java.util.*
 
 class MainActivity : AppCompatActivity(), AddFeedDialogListener,
     RemoveFeedDialogListener, OnRefreshListener {
-    private lateinit var reader: Reader
     private lateinit var drawerAdapter: ArrayAdapter<Channel>
     private lateinit var newsAdapter: NewsAdapter
     private lateinit var adapterDataObserver: AdapterDataObserver
     private lateinit var drawerToggle: ActionBarDrawerToggle
-    private var selectedChannel: Channel? = null
+    private lateinit var selectedChannel: Channel
     private lateinit var all: Channel
     private lateinit var channelsViewModel: ChannelViewModel
     private lateinit var newsViewModel: NewsViewModel
@@ -78,9 +75,7 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
         )
             .get(ChannelViewModel::class.java)
         newsViewModel = ViewModelProvider(this)[NewsViewModel::class.java]
-        reader = newsViewModel.reader
         channelsViewModel.channels.observe(this, androidx.lifecycle.Observer { event ->
-            Log.wtf("eventum", "channels changed")
             val handled = event.handled
             onChannelsLoaded(event.getEvent(), refreshNews = !handled)
         })
@@ -90,14 +85,12 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
                 ChannelError.ERROR_ADDING -> createToast(R.string.error_adding_feed)
             }
         })
-        newsViewModel.news.observe(this, androidx.lifecycle.Observer {newsMap ->
-            for (url in newsMap.keys) {
-                reader.finishRefreshing(newsMap[url]?.toTypedArray(), url)
-            }
-            if (newsMap.size == 1) {
-                showNews(reader.getNewsFromFeed(newsMap.keys.first()))
+
+        newsViewModel.n.observe(this, androidx.lifecycle.Observer {newsMap ->
+            if (selectedChannel == all) {
+                showNews(newsMap.values.flatten())
             } else {
-                showNews(reader.allNews)
+                showNews(newsMap[selectedChannel.url] ?: listOf())
             }
         })
     }
@@ -117,24 +110,25 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
             drawer.setItemChecked(position, true)
             selectedChannel =
                 parent.getItemAtPosition(position) as Channel
-            val selectedFeed = selectedChannel!!.url
             drawerLayout.closeDrawer(drawer)
+            supportActionBar?.title = selectedChannel.title
             newsAdapter.cancel()
             if (isConnectedToNetwork()) {
                 if (selectedChannel == all) {
-                    newsViewModel.refreshNews(reader.getFeeds())
+                    val urls = channelsViewModel.channels.value?.getEvent()?.map { it.url }?.toTypedArray()
+                        ?: arrayOf()
+                    newsViewModel.refreshNews(urls)
                 } else {
-                    newsViewModel.refreshNews(arrayOf(selectedChannel!!.url))
+                    newsViewModel.refreshNews(arrayOf(selectedChannel.url))
                 }
             } else {
                 if (selectedChannel == all) {
-                    newsAdapter.news = reader.allNews.toList()
+                    showNews(newsViewModel.n.value?.values?.flatten() ?: listOf())
                 } else {
-                   newsAdapter.news = reader.getNewsFromFeed(selectedFeed).toList()
+                    showNews(newsViewModel.n.value?.get(selectedChannel.url) ?: listOf())
                 }
                 createToast(R.string.no_internet)
             }
-            title = selectedChannel!!.title
         }
     }
 
@@ -203,9 +197,10 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
 
     private fun removeFeed() {
         val newFragment: DialogFragment = RemoveFeedDialogFragment()
-        val args = Bundle()
         val channels = ArrayList<Channel>()
-        channels.addAll(reader.getFeedsCollection())
+        val event = channelsViewModel.channels.value?.getEvent() ?: listOf()
+        channels.addAll(event)
+        val args = Bundle()
         args.putParcelableArrayList(RemoveFeedDialogFragment.FEEDS, channels)
         newFragment.arguments = args
         newFragment.show(
@@ -226,11 +221,9 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
     }
 
     private fun saveSelectedChannel() {
-        if (selectedChannel != null) {
-            val sharedPref = getPreferences(Context.MODE_PRIVATE)
-            sharedPref.edit {
-                putString(getString(R.string.chosen_feed_pref_label), selectedChannel!!.url)
-            }
+        val sharedPref = getPreferences(Context.MODE_PRIVATE)
+        sharedPref.edit {
+            putString(getString(R.string.chosen_feed_pref_label), selectedChannel.url)
         }
     }
 
@@ -258,7 +251,6 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
         if (selectedChannel == channel) {
             selectedChannel = all
         }
-        reader.removeFeed(channel.url)
         drawerAdapter.remove(channel)
         drawerAdapter.notifyDataSetChanged()
         channelsViewModel.deleteChannel(channel)
@@ -284,25 +276,26 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
     }
 
     private fun refreshNews() {
-        if (selectedChannel == null) {
+        if (!this::selectedChannel.isInitialized) {
             selectedChannel = all
         }
         if (isConnectedToNetwork()) {
             newsAdapter.news = listOf()
             if (selectedChannel == all) {
-                newsViewModel.refreshNews(reader.getFeeds())
+                val urls = channelsViewModel.channels.value?.getEvent()?.map { it.url }?.toTypedArray()
+                    ?: arrayOf()
+                newsViewModel.refreshNews(urls)
             } else {
-                newsViewModel.refreshNews(arrayOf(selectedChannel!!.url))
+                newsViewModel.refreshNews(arrayOf(selectedChannel.url))
             }
         } else {
             createToast(R.string.no_internet)
         }
     }
 
-    private fun showNews(newsSet: Set<News>) {
-        newsAdapter.channelURL = selectedChannel?.url
-        newsAdapter.news = newsSet.toList()
-        title = selectedChannel?.title
+    private fun showNews(newsCollection: Collection<News>) {
+        newsAdapter.channelURL = selectedChannel.url
+        newsAdapter.news = newsCollection.toList()
     }
 
     override fun onDestroy() {
@@ -312,7 +305,6 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
 
 
     private fun onChannelsLoaded(data: List<Channel>, refreshNews: Boolean = true) {
-        reader.addAll(data)
         drawerAdapter.clear()
         if (data.isEmpty()) {
             emptyView.setText(R.string.no_feeds_added_yet)
@@ -322,17 +314,19 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
         drawerAdapter.add(all)
         drawerAdapter.addAll(data)
         drawerAdapter.notifyDataSetChanged()
-        selectedChannel = reader.getFeed(selectedFeedFromPreferences)
+        selectedChannel = data.find {  it.url == selectedFeedFromPreferences } ?: all
         val position = drawerAdapter.getPosition(selectedChannel)
         drawer.setSelection(position)
         drawer.setItemChecked(position, true)
-        if (selectedChannel == null) {
-            supportActionBar?.setTitle(R.string.chosen_feed_default)
-        } else {
-            title = selectedChannel!!.title
-        }
+        supportActionBar?.title = selectedChannel.title
         if (refreshNews) {
             refreshNews()
+        } else {
+            if (selectedChannel == all) {
+                showNews(newsViewModel.n.value?.values?.flatten() ?: listOf())
+            } else {
+                showNews(newsViewModel.n.value?.get(selectedChannel.url) ?: listOf())
+            }
         }
     }
 

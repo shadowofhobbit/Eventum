@@ -14,7 +14,7 @@ class HTMLFormatterTest {
         val link = "http://www"
         val description = "my description"
         val date = Date()
-        val news = News(title, link, description, date)
+        val news = News(title, link, description, date, "https://www.example.com/rss")
         val formattedNews = formatNews(news)
         Assert.assertTrue("No title", formattedNews.contains(title))
         val formattedDate = DateFormat.getDateTimeInstance().format(date)

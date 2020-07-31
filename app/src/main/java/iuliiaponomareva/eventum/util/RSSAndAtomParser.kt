@@ -165,9 +165,9 @@ class RSSAndAtomParser {
             parser.nextTag()
             parser.require(XmlPullParser.START_TAG, null, null)
             if (parser.name == RSS_FEED_START_TAG) {
-                result = parseRSSNews(parser)
+                result = parseRSSNews(parser, url)
             } else if (parser.name == ATOM_FEED_START_TAG) {
-                result = parseAtomNews(parser)
+                result = parseAtomNews(parser, url)
             }
         } catch (e: IOException) {
             e.printStackTrace()
@@ -185,7 +185,7 @@ class RSSAndAtomParser {
         return result
     }
 
-    private fun parseRSSNews(parser: XmlPullParser): Set<News> {
+    private fun parseRSSNews(parser: XmlPullParser, channelUrl: String): Set<News> {
         val result: MutableSet<News> = TreeSet(NewsComparator())
         try {
             while (!(parser.next() == XmlPullParser.END_TAG
@@ -200,7 +200,7 @@ class RSSAndAtomParser {
                         if (parser.eventType == XmlPullParser.START_TAG
                             && parser.name == "item"
                         ) {
-                            val news = parseItem(parser)
+                            val news = parseItem(parser, channelUrl)
                             result.add(news)
                         }
                     }
@@ -215,7 +215,7 @@ class RSSAndAtomParser {
     }
 
     @Throws(XmlPullParserException::class, IOException::class)
-    private fun parseItem(parser: XmlPullParser): News {
+    private fun parseItem(parser: XmlPullParser, channelUrl: String): News {
         var title = ""
         var link = ""
         var description = ""
@@ -235,14 +235,14 @@ class RSSAndAtomParser {
         val news: News
         news = if (pubDate != null) {
             val parsedDate = parseDate(pubDate, Format.RSS)
-            News(title, link, description, parsedDate)
+            News(title, link, description, parsedDate, channelUrl)
         } else {
-            News(title, link, description)
+            News(title, link, description, null, channelUrl)
         }
         return news
     }
 
-    private fun parseAtomNews(parser: XmlPullParser): Set<News> {
+    private fun parseAtomNews(parser: XmlPullParser, channelUrl: String): Set<News> {
         val result: MutableSet<News> = TreeSet(NewsComparator())
         try {
             while (!(parser.next() == XmlPullParser.END_TAG
@@ -251,7 +251,7 @@ class RSSAndAtomParser {
                 if (parser.eventType == XmlPullParser.START_TAG
                     && parser.name == "entry"
                 ) {
-                    val news = parseEntry(parser)
+                    val news = parseEntry(parser, channelUrl)
                     result.add(news)
                 }
             }
@@ -264,7 +264,7 @@ class RSSAndAtomParser {
     }
 
     @Throws(XmlPullParserException::class, IOException::class)
-    private fun parseEntry(parser: XmlPullParser): News {
+    private fun parseEntry(parser: XmlPullParser, channelUrl: String): News {
         var title = ""
         var link: String? = ""
         var description = ""
@@ -291,9 +291,9 @@ class RSSAndAtomParser {
         val news: News
         news = if (pubDate != null) {
             val parsedDate = parseDate(pubDate, Format.ATOM)
-            News(title, link, description, parsedDate)
+            News(title, link, description, parsedDate, channelUrl)
         } else {
-            News(title, link, description)
+            News(title, link, description, null, channelUrl)
         }
         return news
     }
