@@ -86,7 +86,7 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
             }
         })
 
-        newsViewModel.n.observe(this, androidx.lifecycle.Observer {newsMap ->
+        newsViewModel.allNews.observe(this, androidx.lifecycle.Observer { newsMap ->
             if (selectedChannel == all) {
                 showNews(newsMap.values.flatten())
             } else {
@@ -123,9 +123,9 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
                 }
             } else {
                 if (selectedChannel == all) {
-                    showNews(newsViewModel.n.value?.values?.flatten() ?: listOf())
+                    showNews(newsViewModel.allNews.value?.values?.flatten() ?: listOf())
                 } else {
-                    showNews(newsViewModel.n.value?.get(selectedChannel.url) ?: listOf())
+                    showNews(newsViewModel.allNews.value?.get(selectedChannel.url) ?: listOf())
                 }
                 createToast(R.string.no_internet)
             }
@@ -323,9 +323,9 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
             refreshNews()
         } else {
             if (selectedChannel == all) {
-                showNews(newsViewModel.n.value?.values?.flatten() ?: listOf())
+                showNews(newsViewModel.allNews.value?.values?.flatten() ?: listOf())
             } else {
-                showNews(newsViewModel.n.value?.get(selectedChannel.url) ?: listOf())
+                showNews(newsViewModel.allNews.value?.get(selectedChannel.url) ?: listOf())
             }
         }
     }

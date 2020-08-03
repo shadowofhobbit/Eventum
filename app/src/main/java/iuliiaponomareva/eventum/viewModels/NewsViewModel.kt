@@ -9,14 +9,13 @@ import kotlinx.coroutines.launch
 
 class NewsViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: NewsRepository
-    private val allNews: LiveData<List<News>>
-    val n: LiveData<Map<String, List<News>>>
+    val allNews: LiveData<Map<String, List<News>>>
 
     init {
         val newsDao = ReaderDatabase.getDatabase(application).newsDao()
         repository = NewsRepository(newsDao)
-        allNews = repository.loadAll()
-        n = allNews.map { x -> x.groupBy { it.channelUrl } }
+        this.allNews = repository.loadAll()
+            .map { x -> x.groupBy { it.channelUrl } }
     }
 
     fun refreshNews(urls: Array<String>) {
