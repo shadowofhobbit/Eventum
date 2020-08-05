@@ -37,7 +37,7 @@ class ChannelViewModel(private val repository: ChannelRepository) : ViewModel() 
 
     private fun checkURL(url: String): String {
         if (!url.startsWith("http")) {
-            return "http://$url"
+            return "https://$url"
         }
         return url
     }
