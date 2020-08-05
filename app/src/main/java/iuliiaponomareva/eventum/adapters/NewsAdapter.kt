@@ -1,6 +1,8 @@
 package iuliiaponomareva.eventum.adapters
 
 import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -124,8 +126,18 @@ private class NewsImageGetter(
 
     init {
         val metrics = DisplayMetrics()
-        (view.context as Activity).windowManager.defaultDisplay
-            .getMetrics(metrics)
+        getActivity(view.context)?.windowManager?.defaultDisplay?.getMetrics(metrics)
         width = metrics.widthPixels
+    }
+
+    private fun getActivity(context: Context): Activity? {
+        var currentContext = context
+        while (currentContext is ContextWrapper) {
+            if (currentContext is Activity) {
+                return currentContext
+            }
+            currentContext = currentContext.baseContext
+        }
+        return null
     }
 }
