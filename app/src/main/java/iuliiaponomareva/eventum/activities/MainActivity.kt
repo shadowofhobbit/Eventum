@@ -75,18 +75,18 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
         )
             .get(ChannelViewModel::class.java)
         newsViewModel = ViewModelProvider(this)[NewsViewModel::class.java]
-        channelsViewModel.channels.observe(this, androidx.lifecycle.Observer { event ->
+        channelsViewModel.channels.observe(this, { event ->
             val handled = event.handled
             onChannelsLoaded(event.getEvent(), refreshNews = !handled)
         })
-        channelsViewModel.error.observe(this, androidx.lifecycle.Observer {
+        channelsViewModel.error.observe(this, {
             when (val error = it.getEventIfNotHandled()) {
                 ChannelError.ALREADY_EXISTS -> createToast(error.url + " " + getString(R.string.has_already_been_added))
                 ChannelError.ERROR_ADDING -> createToast(R.string.error_adding_feed)
             }
         })
 
-        newsViewModel.allNews.observe(this, androidx.lifecycle.Observer { newsMap ->
+        newsViewModel.allNews.observe(this, { newsMap ->
             if (selectedChannel == all) {
                 showNews(newsMap.values.flatten())
             } else {
@@ -247,13 +247,13 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
         toast.show()
     }
 
-    override fun removeChosenFeed(channel: Channel) {
-        if (selectedChannel == channel) {
+    override fun removeChosenFeed(feed: Channel) {
+        if (selectedChannel == feed) {
             selectedChannel = all
         }
-        drawerAdapter.remove(channel)
+        drawerAdapter.remove(feed)
         drawerAdapter.notifyDataSetChanged()
-        channelsViewModel.deleteChannel(channel)
+        channelsViewModel.deleteChannel(feed)
     }
 
     @Suppress("DEPRECATION")
