@@ -103,7 +103,7 @@ private class NewsImageGetter(
     }
 
     override fun onBitmapLoaded(bitmap: Bitmap, from: Picasso.LoadedFrom) {
-        if (source != null && bitmap != null) {
+        if (source != null) {
             val image: Drawable = BitmapDrawable(
                 view.context.resources,
                 bitmap
@@ -118,7 +118,7 @@ private class NewsImageGetter(
 
     override fun onBitmapFailed(
         exception: Exception,
-        errorDrawable: Drawable
+        errorDrawable: Drawable?
     ) {
     }
 
