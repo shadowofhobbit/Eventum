@@ -1,6 +1,5 @@
 package iuliiaponomareva.eventum
 
-import android.util.Log
 import iuliiaponomareva.eventum.data.News
 import iuliiaponomareva.eventum.data.NewsDao
 import iuliiaponomareva.eventum.util.RSSAndAtomParser
@@ -14,7 +13,6 @@ class NewsRepository(private val newsDao: NewsDao) {
         return withContext(Dispatchers.IO) {
             val result = HashMap<String, Set<News>>()
             for (url in urls) {
-                Log.wtf("eventum", "parsing")
                 val news = parser.parseNews(url)
                 newsDao.replaceNewsForUrl(news, url)
                 result[url] = news
