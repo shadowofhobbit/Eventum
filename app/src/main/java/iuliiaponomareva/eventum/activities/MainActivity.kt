@@ -12,8 +12,6 @@ import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.AdapterView.OnItemClickListener
-import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
@@ -27,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener
 import iuliiaponomareva.eventum.ChannelRepository
 import iuliiaponomareva.eventum.R
+import iuliiaponomareva.eventum.adapters.ChannelsAdapter
 import iuliiaponomareva.eventum.adapters.NewsAdapter
 import iuliiaponomareva.eventum.data.Channel
 import iuliiaponomareva.eventum.data.News
@@ -44,7 +43,7 @@ import java.util.*
 
 class MainActivity : AppCompatActivity(), AddFeedDialogListener,
     RemoveFeedDialogListener, OnRefreshListener {
-    private lateinit var drawerAdapter: ArrayAdapter<Channel>
+    private lateinit var drawerAdapter: ChannelsAdapter
     private lateinit var newsAdapter: NewsAdapter
     private lateinit var adapterDataObserver: AdapterDataObserver
     private lateinit var drawerToggle: ActionBarDrawerToggle
@@ -100,23 +99,22 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
             this, drawerLayout, R.string.drawer_open,
             R.string.drawer_close
         )
-        drawerAdapter = ArrayAdapter(
-            this@MainActivity,
-            R.layout.drawer_list_item, ArrayList()
-        )
-        drawerLayout.addDrawerListener(drawerToggle)
+        drawerAdapter = ChannelsAdapter(onChannelSelected())
         drawer.adapter = drawerAdapter
-        drawer.onItemClickListener = OnItemClickListener { parent, _, position, _ ->
-            drawer.setItemChecked(position, true)
-            selectedChannel =
-                parent.getItemAtPosition(position) as Channel
+        drawerLayout.addDrawerListener(drawerToggle)
+    }
+
+    private fun onChannelSelected(): (Channel) -> Unit {
+        return fun(channel: Channel) {
+            selectedChannel = channel
             drawerLayout.closeDrawer(drawer)
             supportActionBar?.title = selectedChannel.title
             newsAdapter.cancel()
             if (isConnectedToNetwork()) {
                 if (selectedChannel == all) {
-                    val urls = channelsViewModel.channels.value?.getEvent()?.map { it.url }?.toTypedArray()
-                        ?: arrayOf()
+                    val urls =
+                        channelsViewModel.channels.value?.getEvent()?.map { it.url }?.toTypedArray()
+                            ?: arrayOf()
                     newsViewModel.refreshNews(urls)
                 } else {
                     newsViewModel.refreshNews(arrayOf(selectedChannel.url))
@@ -252,7 +250,6 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
             selectedChannel = all
         }
         drawerAdapter.remove(feed)
-        drawerAdapter.notifyDataSetChanged()
         channelsViewModel.deleteChannel(feed)
     }
 
@@ -311,13 +308,12 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
         } else {
             emptyView.setText(R.string.loading)
         }
-        drawerAdapter.add(all)
-        drawerAdapter.addAll(data)
-        drawerAdapter.notifyDataSetChanged()
-        selectedChannel = data.find {  it.url == selectedFeedFromPreferences } ?: all
-        val position = drawerAdapter.getPosition(selectedChannel)
-        drawer.setSelection(position)
-        drawer.setItemChecked(position, true)
+        val channels = mutableListOf(all)
+        channels.addAll(data)
+        drawerAdapter.addAll(channels)
+        if (!this::selectedChannel.isInitialized) {
+            selectedChannel = data.find { it.url == selectedFeedFromPreferences } ?: all
+        }
         supportActionBar?.title = selectedChannel.title
         if (refreshNews) {
             refreshNews()
