@@ -65,7 +65,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:3.12.12'
     implementation "androidx.core:core-ktx:1.5.0"
     implementation "androidx.sqlite:sqlite-ktx:2.1.0"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_android_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_android_version"
 
@@ -76,7 +76,7 @@ dependencies {
     kapt "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
 
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.2'
     // optional - Test helpers for LiveData
     testImplementation "androidx.arch.core:core-testing:$arch_version"
 
