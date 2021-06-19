@@ -47,10 +47,13 @@ android {
         androidTest.assets.srcDirs +=
                 files("$projectDir/schemas".toString())
     }
+    packagingOptions {
+        exclude "DebugProbesKt.bin"
+    }
 }
 
 dependencies {
-    def coroutines_android_version = '1.3.7'
+    def coroutines_android_version = '1.5.0'
     def lifecycle_version = '2.3.1'
     def livedata_version = '2.3.1'
     def room_version = "2.3.0"
