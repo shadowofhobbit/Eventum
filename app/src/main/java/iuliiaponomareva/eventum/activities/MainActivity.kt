@@ -120,10 +120,11 @@ class MainActivity : AppCompatActivity(), AddFeedDialogListener,
                     newsViewModel.refreshNews(arrayOf(selectedChannel.url))
                 }
             } else {
+                val allNews = newsViewModel.allNews.value
                 if (selectedChannel == all) {
-                    showNews(newsViewModel.allNews.value?.values?.flatten() ?: listOf())
+                    showNews(allNews?.values?.flatten() ?: listOf())
                 } else {
-                    showNews(newsViewModel.allNews.value?.get(selectedChannel.url) ?: listOf())
+                    showNews(allNews?.get(selectedChannel.url) ?: listOf())
                 }
                 createToast(R.string.no_internet)
             }

@@ -15,7 +15,7 @@ class NewsViewModel(application: Application) : AndroidViewModel(application) {
         val newsDao = ReaderDatabase.getDatabase(application).newsDao()
         repository = NewsRepository(newsDao)
         this.allNews = repository.loadAll()
-            .map { x -> x.groupBy { it.channelUrl } }
+            .map { news -> news.groupBy { it.channelUrl } }
     }
 
     fun refreshNews(urls: Array<String>) {

@@ -33,7 +33,7 @@ class AddFeedDialogFragment : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder =
             AlertDialog.Builder(activity)
-        val inflater = activity!!.layoutInflater
+        val inflater = requireActivity().layoutInflater
         val view = inflater.inflate(R.layout.add_feed, null)
         builder.setTitle(R.string.add_feed).setMessage(R.string.enter_url).setView(view)
         builder.setPositiveButton(R.string.add_feed) { _, _ ->

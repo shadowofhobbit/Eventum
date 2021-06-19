@@ -16,7 +16,7 @@ class ChannelsAdapter(private val onClickListener: (Channel) -> Unit) : Recycler
         val itemView = layoutInflater.inflate(R.layout.drawer_list_item, parent, false)
         val holder = ChannelViewHolder(itemView)
         holder.itemView.setOnClickListener {
-            onClickListener(channels[holder.adapterPosition])
+            onClickListener(channels[holder.bindingAdapterPosition])
         }
         return holder
     }

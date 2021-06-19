@@ -34,13 +34,13 @@ class RemoveFeedDialogFragment : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder =
             AlertDialog.Builder(activity)
-        val inflater = activity!!.layoutInflater
+        val inflater = requireActivity().layoutInflater
         val dialogView = inflater.inflate(R.layout.remove_feed, null)
         builder.setTitle(R.string.remove_feed)
             .setView(dialogView)
         val feeds = arguments?.getParcelableArrayList<Channel>(FEEDS) ?: arrayListOf()
         val adapter = ArrayAdapter(
-            activity!!,
+            requireActivity(),
             R.layout.news_list_item, feeds
         )
         dialogView.feedsListView.adapter = adapter
