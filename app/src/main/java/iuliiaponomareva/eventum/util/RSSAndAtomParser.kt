@@ -137,9 +137,8 @@ class RSSAndAtomParser {
     @Throws(IOException::class)
     private fun getInputStream(url: String): InputStream {
         val request = Request.Builder().url(url).build()
-        val response: Response
-        response = client.newCall(request).execute()
-        return response.body()!!.byteStream()
+        val response: Response = client.newCall(request).execute()
+        return response.body!!.byteStream()
     }
 
     @Throws(IOException::class, XmlPullParserException::class)
